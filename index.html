@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>組別 CRM · 商機追蹤</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg: #F2F4F2;
+  --surface: #FFFFFF;
+  --surface-sunken: #EAEDEA;
+  --ink: #14231F;
+  --ink-soft: #5B6B65;
+  --ink-faint: #93A19B;
+  --line: #DDE3DE;
+  --accent: #0B6E5C;
+  --accent-soft: #E4F1EC;
+  --amber: #C97A2B;
+  --amber-soft: #FBEBDA;
+  --violet: #6B4FA0;
+  --violet-soft: #ECE6F5;
+  --slate: #7C8FA6;
+  --slate-soft: #E8ECF1;
+  --brick: #B0413E;
+  --brick-soft: #F7E6E5;
+  --ink-navy: #223047;
+  --ink-navy-soft: #E7EAF0;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(20,35,31,0.06), 0 8px 24px -12px rgba(20,35,31,0.18);
+  font-family: 'Noto Sans TC', -apple-system, sans-serif;
+}
+*{ box-sizing: border-box; margin:0; padding:0; }
+body{ background: var(--bg); color: var(--ink); min-height: 100vh; padding-bottom: 60px; }
+.mono{ font-family:'IBM Plex Mono', monospace; }
+button{ font-family: inherit; }
+
+/* ---------- Top bar ---------- */
+.topbar{
+  background: var(--surface); border-bottom: 1px solid var(--line); padding: 16px 32px;
+  display:flex; align-items:center; justify-content:space-between; position: sticky; top:0; z-index: 40;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand .mark{
+  width:34px; height:34px; border-radius:8px; background: linear-gradient(135deg, var(--accent), #0A5548);
+  display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:15px;
+}
+.brand.mgr .mark{ background: linear-gradient(135deg, var(--ink-navy), #16202F); }
+.brand h1{ font-size:17px; font-weight:700; letter-spacing:0.2px; }
+.brand .sub{ font-size:12px; color:var(--ink-faint); margin-top:2px; }
+.brand-text{ display:flex; flex-direction:column; }
+.topbar-right{ display:flex; align-items:center; gap:14px; }
+.identity-chip{
+  display:flex; align-items:center; gap:8px; background: var(--surface-sunken); padding:6px 12px 6px 6px; border-radius:100px;
+}
+.identity-avatar{
+  width:26px; height:26px; border-radius:50%; background: var(--accent); color:#fff; font-size:11px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+}
+.identity-chip.mgr .identity-avatar{ background: var(--ink-navy); }
+.identity-name{ font-size:12.5px; font-weight:700; }
+.identity-role{ font-size:10.5px; color: var(--ink-faint); }
+.switch-link{ font-size:12px; color: var(--accent); font-weight:700; background:none; border:none; cursor:pointer; text-decoration:underline; }
+.btn{ border:none; border-radius:8px; padding:10px 18px; font-size:13.5px; font-weight:600; cursor:pointer; transition: all .15s ease; }
+.btn-primary{ background: var(--accent); color:#fff; }
+.btn-primary:hover{ background:#0A5548; transform: translateY(-1px); }
+.btn-ghost{ background: transparent; color: var(--ink-soft); border:1px solid var(--line); }
+.btn-ghost:hover{ background: var(--surface-sunken); }
+.btn-danger{ background: transparent; color: var(--brick); border:1px solid var(--brick-soft); }
+.btn-danger:hover{ background: var(--brick-soft); }
+
+.readonly-banner{
+  background: var(--ink-navy-soft); color:#3A4A63; border:1px solid #D3DAE6; border-radius:8px;
+  padding:10px 16px; font-size:12.5px; font-weight:600; margin-bottom:18px; display:flex; align-items:center; gap:8px;
+}
+
+/* ---------- Layout ---------- */
+.wrap{ max-width: 1240px; margin: 0 auto; padding: 28px 32px; }
+
+/* KPI row */
+.kpis{ display:grid; grid-template-columns: repeat(4,1fr); gap:16px; margin-bottom: 26px; }
+.kpi{ background: var(--surface); border:1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+.kpi .label{ font-size:12px; color:var(--ink-faint); font-weight:600; letter-spacing:0.3px; }
+.kpi .value{ font-family:'IBM Plex Mono', monospace; font-size:26px; font-weight:600; margin-top:6px; }
+.kpi .value.accent{ color:var(--accent); }
+.kpi .value.amber{ color:var(--amber); }
+
+/* Manager rep summary table */
+.rep-summary{ background: var(--surface); border:1px solid var(--line); border-radius: var(--radius); overflow:hidden; margin-bottom: 26px; }
+.rep-summary table{ width:100%; border-collapse: collapse; }
+.rep-summary thead th{ text-align:left; font-size:11.5px; font-weight:700; color: var(--ink-faint); letter-spacing:0.4px; padding: 12px 18px; border-bottom:1px solid var(--line); background: var(--surface-sunken); }
+.rep-summary tbody td{ padding: 13px 18px; border-bottom:1px solid var(--line); font-size:13.5px; }
+.rep-summary tbody tr:last-child td{ border-bottom:none; }
+.rep-summary tbody tr{ cursor:pointer; transition: background .12s; }
+.rep-summary tbody tr:hover{ background: var(--surface-sunken); }
+.rep-summary tbody tr.active-row{ background: var(--ink-navy-soft); }
+.rep-name-cell{ display:flex; align-items:center; gap:8px; font-weight:700; }
+.rep-mini-avatar{ width:24px; height:24px; border-radius:50%; background: var(--ink-navy); color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.rep-summary-note{ font-size:11px; color: var(--ink-faint); padding: 8px 18px 14px; }
+
+/* toolbar */
+.toolbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+.toolbar-left{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.section-title{ font-size:15px; font-weight:700; }
+.pill-filter{ display:flex; gap:6px; background: var(--surface-sunken); padding:4px; border-radius:8px; flex-wrap:wrap; }
+.pill-filter button{ border:none; background:transparent; padding:7px 13px; font-size:12.5px; font-weight:600; color: var(--ink-soft); border-radius:6px; cursor:pointer; }
+.pill-filter button.active{ background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.pill-filter.rep-pills button.active{ background: var(--ink-navy); color:#fff; }
+.search-box{ border:1px solid var(--line); border-radius:8px; padding:9px 14px; font-size:13px; width:220px; background:var(--surface); }
+.search-box:focus{ outline:none; border-color: var(--accent); }
+
+/* table */
+.table-card{ background: var(--surface); border:1px solid var(--line); border-radius: var(--radius); overflow:hidden; }
+table{ width:100%; border-collapse: collapse; }
+thead th{ text-align:left; font-size:11.5px; font-weight:700; color: var(--ink-faint); letter-spacing:0.4px; padding: 13px 14px; border-bottom:1px solid var(--line); background: var(--surface-sunken); white-space:nowrap; }
+tbody td{ padding: 14px 14px; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:middle; }
+tbody tr:last-child td{ border-bottom:none; }
+tbody tr{ cursor:pointer; transition: background .12s ease; }
+tbody tr:hover{ background: var(--surface-sunken); }
+.cust-name{ font-weight:700; }
+.cust-project{ font-size:12px; color:var(--ink-faint); margin-top:2px; }
+.amount{ font-family:'IBM Plex Mono', monospace; font-weight:600; }
+.owner-tag{ font-size:12px; font-weight:700; color: var(--ink-navy); background: var(--ink-navy-soft); padding:3px 9px; border-radius:100px; }
+.stage-badge{ display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:100px; font-size:12px; font-weight:700; }
+.dot{ width:6px; height:6px; border-radius:50%; }
+.stage-初訪{ background: var(--slate-soft); color:#4C5D71; }
+.stage-初訪 .dot{ background: var(--slate); }
+.stage-再訪{ background: var(--amber-soft); color:#8A5719; }
+.stage-再訪 .dot{ background: var(--amber); }
+.stage-提案{ background: var(--violet-soft); color:#4E3878; }
+.stage-提案 .dot{ background: var(--violet); }
+.stage-結案.won{ background: var(--accent-soft); color:#0A5548; }
+.stage-結案.won .dot{ background: var(--accent); }
+.stage-結案.lost{ background: var(--brick-soft); color:#8C3330; }
+.stage-結案.lost .dot{ background: var(--brick); }
+.stage-結案.pending{ background: var(--surface-sunken); color:var(--ink-soft); }
+.stage-結案.pending .dot{ background: var(--ink-faint); }
+
+/* ---------- 白名單開發 ---------- */
+.wl-status-badge{ display:inline-flex; align-items:center; padding:4px 10px; border-radius:100px; font-size:12px; font-weight:700; }
+.wl-pending{ background: var(--slate-soft); color:#4C5D71; }
+.wl-converted{ background: var(--accent-soft); color:#0A5548; }
+.wl-unreachable{ background: var(--brick-soft); color:#8C3330; }
+.wl-excluded{ background: var(--surface-sunken); color:var(--ink-faint); }
+.wl-tag-未接{ background: var(--brick-soft); color:#8C3330; }
+.wl-tag-已接通無需求{ background: var(--slate-soft); color:#4C5D71; }
+.wl-tag-已接通待追蹤{ background: var(--amber-soft); color:#8A5719; }
+.wl-tag-有意願轉商機{ background: var(--violet-soft); color:#4E3878; }
+.wl-picker-results{ max-height:170px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; margin-top:6px; background: var(--surface); }
+.wl-picker-item{ padding:8px 10px; font-size:12.5px; cursor:pointer; border-bottom:1px solid var(--line); }
+.wl-picker-item:last-child{ border-bottom:none; }
+.wl-picker-item:hover{ background: var(--surface-sunken); }
+.wl-picker-item .id{ font-family:'IBM Plex Mono', monospace; color:var(--ink-faint); font-size:11px; }
+.wl-picker-selected{ margin-top:8px; background: var(--accent-soft); border-radius:8px; padding:10px 12px; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.wl-picker-selected a{ color:var(--accent); font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0; }
+
+.rate-bar{ width:64px; height:5px; background: var(--surface-sunken); border-radius: 3px; overflow:hidden; }
+.rate-bar > div{ height:100%; background: var(--accent); }
+.rate-row{ display:flex; align-items:center; gap:8px; }
+.rate-num{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; }
+
+.next-follow{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; }
+.next-follow.soon{ color: var(--amber); font-weight:700; }
+.next-follow.overdue{ color: var(--brick); font-weight:700; }
+.next-follow.none{ color: var(--ink-faint); }
+
+.empty-state{ padding: 60px 20px; text-align:center; color: var(--ink-faint); }
+.empty-state .big{ font-size:15px; font-weight:600; color: var(--ink-soft); margin-bottom:6px; }
+
+/* ---------- Detail panel ---------- */
+.scrim{ position:fixed; inset:0; background: rgba(20,35,31,0.35); backdrop-filter: blur(2px); opacity:0; pointer-events:none; transition: opacity .2s ease; z-index:50; }
+.scrim.show{ opacity:1; pointer-events:auto; }
+.panel{
+  position:fixed; top:0; right:0; height:100vh; width: 560px; max-width: 92vw; background: var(--bg);
+  box-shadow: -12px 0 40px rgba(20,35,31,0.18); transform: translateX(100%);
+  transition: transform .28s cubic-bezier(.2,.8,.2,1); z-index:51; overflow-y:auto;
+}
+.panel.show{ transform: translateX(0); }
+.panel-head{ background: var(--surface); border-bottom:1px solid var(--line); padding: 22px 26px; position:sticky; top:0; z-index:5; display:flex; align-items:flex-start; justify-content:space-between; }
+.panel-head h2{ font-size:19px; font-weight:800; }
+.panel-head .proj{ font-size:13px; color: var(--ink-faint); margin-top:4px; }
+.close-btn{ border:none; background: var(--surface-sunken); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:15px; color: var(--ink-soft); flex-shrink:0; }
+.panel-body{ padding: 22px 26px 60px; }
+
+.owner-row{ display:flex; align-items:center; justify-content:space-between; background: var(--surface); border:1px solid var(--line); border-radius:8px; padding: 12px 14px; margin-bottom:16px; }
+.owner-row .lbl{ font-size:11px; font-weight:700; color: var(--ink-faint); letter-spacing:0.3px; display:block; margin-bottom:4px; }
+.owner-row .val{ font-size:14px; font-weight:700; }
+.owner-row select{ font-family:inherit; font-size:12.5px; border:1px solid var(--line); border-radius:6px; padding:6px 8px; background: var(--surface); color: var(--accent); font-weight:700; }
+
+.field-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom: 10px; }
+.field{ background: var(--surface); border:1px solid var(--line); border-radius:8px; padding: 12px 14px; }
+.field.full{ grid-column: 1 / -1; }
+.field label{ font-size:11px; font-weight:700; color: var(--ink-faint); letter-spacing:0.3px; display:block; margin-bottom:5px; }
+.field input, .field select, .field textarea{ border:none; width:100%; font-family:inherit; font-size:14px; color:var(--ink); background:transparent; }
+.field input:focus, .field select:focus, .field textarea:focus{ outline:none; }
+.field textarea{ resize: vertical; min-height:44px; }
+.field .ro-text{ font-size:14px; font-weight:600; color: var(--ink-soft); }
+.block-hint{ font-size:11.5px; color: var(--ink-faint); line-height:1.5; margin:-6px 0 12px; }
+.vproposal-fields{ margin-top:12px; padding-top:12px; border-top:1.5px dashed var(--rec-edit-border); }
+.field.pred-field{ background: var(--rec-purple-soft); border-color: var(--rec-edit-border); }
+.field .pred-text{ font-family:'IBM Plex Mono', monospace; font-weight:800; font-size:18px; color: var(--rec-purple); }
+
+.panel-body.ro .field{ background: var(--surface-sunken); }
+.panel-body.ro input, .panel-body.ro select, .panel-body.ro textarea{ color: var(--ink-soft); }
+.panel-body.ro .field.pred-field{ background: var(--surface-sunken); }
+.panel-body.ro .pred-text{ color: var(--ink-soft); }
+
+.block-title{ font-size:12.5px; font-weight:800; color: var(--ink-soft); letter-spacing:0.5px; text-transform: uppercase; margin: 26px 0 12px; display:flex; align-items:center; gap:8px; }
+.block-title::after{ content:''; flex:1; height:1px; background: var(--line); }
+
+.timeline{ position:relative; padding-left: 26px; }
+.timeline::before{ content:''; position:absolute; left:7px; top:6px; bottom:6px; width:2px; background: var(--line); }
+.tl-item{ position:relative; padding-bottom: 22px; }
+.tl-item:last-child{ padding-bottom:0; }
+.tl-node{ position:absolute; left:-26px; top:2px; width:16px; height:16px; border-radius:50%; background: var(--surface); border:3px solid var(--slate); z-index:2; }
+.tl-item[data-type="初訪"] .tl-node{ border-color: var(--slate); }
+.tl-item[data-type="再訪"] .tl-node{ border-color: var(--amber); }
+.tl-item[data-type="提案"] .tl-node{ border-color: var(--violet); }
+.tl-item[data-type="結案"] .tl-node{ border-color: var(--accent); }
+.tl-card{ background: var(--surface); border:1px solid var(--line); border-radius:8px; padding: 13px 15px; }
+.tl-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.tl-date{ font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; color: var(--ink-soft); }
+.tl-type-tag{ font-size:11px; font-weight:700; padding:2px 8px; border-radius:100px; }
+.tl-content{ font-size:13.5px; line-height:1.6; color: var(--ink); margin-bottom: 8px; }
+.tl-next{ font-size:12px; color: var(--ink-faint); border-top:1px dashed var(--line); padding-top:8px; }
+.tl-proposal{ background: var(--rec-purple-soft); border-radius:6px; padding:8px 10px; margin-bottom:8px; }
+.tl-proposal-row{ display:flex; justify-content:space-between; gap:10px; font-size:12px; padding:2px 0; }
+.tl-proposal-row span{ color: var(--ink-faint); flex-shrink:0; }
+.tl-proposal-row b{ color: var(--rec-purple); text-align:right; }
+.tl-next b{ color: var(--ink-soft); }
+.tl-sys{ font-size:11.5px; color: var(--ink-faint); font-style:italic; padding: 2px 0 2px 2px; }
+
+.add-visit-box{ background: var(--surface); border:1.5px dashed var(--line); border-radius:8px; padding: 14px 15px; margin-top: 6px; }
+.add-visit-box.editing{ border-style:solid; border-color: var(--accent); }
+.toggle-add{ display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--accent); font-weight:700; font-size:13px; }
+.toggle-add .plus{ width:20px; height:20px; border-radius:50%; background: var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:14px; }
+.add-visit-form{ margin-top:12px; display:none; }
+.add-visit-form.show{ display:block; }
+
+.result-toggle{ display:flex; gap:8px; margin-top:6px; }
+.result-toggle button{ flex:1; border:1.5px solid var(--line); background: var(--surface); border-radius:8px; padding:9px; font-size:13px; font-weight:700; cursor:pointer; color: var(--ink-soft); }
+.result-toggle button.won.active{ background: var(--accent-soft); border-color: var(--accent); color:#0A5548; }
+.result-toggle button.lost.active{ background: var(--brick-soft); border-color: var(--brick); color:#8C3330; }
+.result-toggle button[disabled]{ cursor:default; opacity:.7; }
+
+.panel-footer{ display:flex; gap:10px; margin-top:28px; }
+
+.stage-stepper{ display:flex; gap:6px; margin-top:4px; }
+.stage-stepper button{ flex:1; padding:9px 4px; border-radius:7px; border:1.5px solid var(--line); background:var(--surface); font-size:12px; font-weight:700; color:var(--ink-faint); cursor:pointer; }
+.stage-stepper button.active{ border-color: var(--accent); background: var(--accent-soft); color:#0A5548; }
+.stage-stepper button[disabled]{ cursor:default; }
+
+/* Modal generic */
+.modal-scrim{ position:fixed; inset:0; background: rgba(20,35,31,0.4); display:none; align-items:center; justify-content:center; z-index:70; padding:20px; }
+.modal-scrim.show{ display:flex; }
+.modal{ background: var(--bg); border-radius: 14px; width: 480px; max-width:100%; padding: 26px; box-shadow: var(--shadow); max-height: 88vh; overflow-y:auto; }
+.modal h3{ font-size:17px; font-weight:800; margin-bottom: 6px; }
+.modal .modal-sub{ font-size:12.5px; color: var(--ink-faint); margin-bottom:18px; }
+.modal .field{ margin-bottom: 12px; }
+.modal-actions{ display:flex; gap:10px; margin-top: 18px; }
+
+/* Identity / login modal */
+.login-scrim{ position:fixed; inset:0; background: var(--bg); display:none; align-items:center; justify-content:center; z-index:80; padding:20px; }
+.login-scrim.show{ display:flex; }
+.login-card{ width:460px; max-width:100%; background: var(--surface); border:1px solid var(--line); border-radius:16px; padding: 34px; box-shadow: var(--shadow); }
+.login-card .mark{ width:44px; height:44px; border-radius:10px; background: linear-gradient(135deg, var(--accent), #0A5548); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:19px; margin-bottom:16px; }
+.login-card h2{ font-size:19px; font-weight:800; margin-bottom:6px; }
+.login-card .desc{ font-size:12.5px; color: var(--ink-faint); margin-bottom:22px; line-height:1.6; }
+.login-group-label{ font-size:11px; font-weight:700; color: var(--ink-faint); letter-spacing:0.4px; margin-bottom:8px; margin-top:16px; }
+.login-options{ display:flex; flex-direction:column; gap:8px; }
+.login-opt{ display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:10px; padding: 12px 14px; cursor:pointer; background: var(--surface); text-align:left; }
+.login-opt:hover{ border-color: var(--accent); background: var(--accent-soft); }
+.login-opt.mgr:hover{ border-color: var(--ink-navy); background: var(--ink-navy-soft); }
+.login-opt .av{ width:32px; height:32px; border-radius:50%; background: var(--accent); color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.login-opt.mgr .av{ background: var(--ink-navy); }
+.login-opt .info b{ display:block; font-size:13.5px; }
+.login-opt .info span{ font-size:11.5px; color: var(--ink-faint); }
+.login-foot{ font-size:11px; color: var(--ink-faint); margin-top:18px; text-align:center; }
+
+@media (max-width: 720px){
+  .wrap{ padding: 18px; }
+  .kpis{ grid-template-columns: repeat(2,1fr); }
+  thead th:nth-child(4), tbody td:nth-child(4){ display:none; }
+  .field-grid{ grid-template-columns: 1fr; }
+}
+
+/* ---------- Page nav ---------- */
+:root{
+  --rec-purple: #6B4FA0;
+  --rec-purple-soft: #F1ECFA;
+  --rec-blue: #2F6FED;
+  --rec-blue-soft: #EAF1FE;
+  --rec-green-soft: #E3F4E8;
+  --rec-green-text: #1F6B3C;
+  --rec-edit-bg: #FBF8FF;
+  --rec-edit-border: #C9B8E8;
+}
+.page-nav{
+  background: var(--surface); border-bottom: 1px solid var(--line); padding: 0 32px;
+  display:flex; gap: 4px; position: sticky; top: 65px; z-index: 39;
+}
+.page-nav-btn{
+  border:none; background:transparent; padding: 13px 6px; margin-right: 22px; font-size:13.5px; font-weight:700;
+  color: var(--ink-faint); cursor:pointer; border-bottom: 2.5px solid transparent; transition: color .15s ease;
+}
+.page-nav-btn:hover{ color: var(--ink-soft); }
+.page-nav-btn.active{ color: var(--ink); border-bottom-color: var(--accent); }
+
+/* ---------- Recognition page ---------- */
+.rec-header{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px; gap:12px; flex-wrap:wrap; }
+.rec-title{ font-size:19px; font-weight:800; }
+.rec-sub{ font-size:12.5px; color: var(--ink-faint); margin-top:4px; }
+.rec-header-right{ display:flex; align-items:center; gap:8px; }
+.rec-quarter{ font-size:12px; font-weight:700; color: var(--ink-faint); background: var(--surface-sunken); padding:6px 12px; border-radius:100px; }
+.rec-scope{ font-size:12px; font-weight:700; color: var(--rec-purple); background: var(--rec-purple-soft); padding:6px 12px; border-radius:100px; }
+
+.rec-filter-row{ display:flex; align-items:center; gap:14px; margin-bottom:12px; flex-wrap:wrap; }
+.rec-filter-label{ font-size:12.5px; font-weight:800; color: var(--ink-soft); width:32px; flex-shrink:0; }
+.rec-chips{ display:flex; gap:8px; flex-wrap:wrap; }
+.rec-chip{
+  border:1.5px solid var(--line); background: var(--surface); border-radius:8px; padding: 7px 12px; cursor:pointer;
+  font-size:12.5px; font-weight:600; color: var(--ink-soft); display:flex; align-items:center; gap:6px;
+}
+.rec-chip .n{ font-family:'IBM Plex Mono', monospace; font-weight:700; color: var(--ink); }
+.rec-chip .c{ color: var(--ink-faint); }
+.rec-chip:hover{ border-color: var(--rec-blue); }
+.rec-chip.active{ background: var(--rec-blue); border-color: var(--rec-blue); color:#fff; }
+.rec-chip.active .n, .rec-chip.active .c{ color:#fff; }
+
+.rec-table-card{ background: var(--surface); border:1px solid var(--line); border-radius: var(--radius); overflow:hidden; margin-top: 18px; }
+.rec-group{ border-bottom: 1px solid var(--line); }
+.rec-group:last-child{ border-bottom:none; }
+.rec-group-head{
+  display:flex; align-items:center; gap:10px; padding: 12px 18px; background: var(--surface-sunken); cursor:pointer;
+  font-size:13px; font-weight:800;
+}
+.rec-group-head .collapse-tag{ font-size:11px; font-weight:700; color: var(--accent); background: var(--accent-soft); padding:3px 9px; border-radius:100px; }
+.rec-group.collapsed .rec-group-body{ display:none; }
+table.rec-table{ width:100%; border-collapse: collapse; }
+table.rec-table thead th{
+  text-align:left; font-size:11px; font-weight:700; color:#5E4C87; letter-spacing:0.3px; padding: 11px 16px;
+  background: var(--rec-purple-soft); border-bottom:1px solid var(--line);
+}
+table.rec-table tbody td{ padding: 12px 16px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; }
+table.rec-table tbody tr:last-child td{ border-bottom:none; }
+.rec-district-cell{ font-weight:800; font-size:13px; color: var(--ink); background: var(--surface-sunken); }
+.rec-readonly{ color: var(--ink-soft); }
+.rec-id{ font-family:'IBM Plex Mono', monospace; font-size:12px; color: var(--ink-faint); }
+.rec-cust{ font-weight:700; }
+.rec-amount{ font-family:'IBM Plex Mono', monospace; }
+.rec-pred{ font-family:'IBM Plex Mono', monospace; font-weight:800; color: var(--rec-purple); }
+
+.rec-editable-wrap{
+  background: var(--rec-edit-bg); border:1.5px solid var(--rec-edit-border); border-radius:7px; padding: 2px 4px;
+}
+.rec-editable-wrap select, .rec-editable-wrap input{
+  border:none; background:transparent; font-family:inherit; font-size:13px; width:100%; padding:6px 6px;
+  color: var(--ink); font-weight:600;
+}
+.rec-editable-wrap select:focus, .rec-editable-wrap input:focus{ outline:none; }
+.rec-editable-wrap.ro{ background: var(--surface-sunken); border-color: var(--line); }
+.rec-editable-wrap.ro select, .rec-editable-wrap.ro input{ color: var(--ink-soft); font-weight:500; }
+
+.rec-subtotal-row td{ background: var(--rec-green-soft); color: var(--rec-green-text); font-weight:800; font-size:12.5px; padding: 10px 16px; }
+
+.rec-empty{ text-align:center; padding: 60px 20px; color: var(--ink-faint); font-size:13.5px; }
+.rec-footnote{ font-size:11px; color: var(--ink-faint); margin-top:16px; line-height:1.7; }
+
+@media (max-width: 720px){
+  .page-nav{ padding: 0 18px; top:auto; position: relative; }
+  table.rec-table{ font-size:12px; }
+}
+.dr-status{ display:inline-flex; align-items:center; padding:4px 10px; border-radius:100px; font-size:12px; font-weight:700; }
+.dr-status.pending{ background: var(--amber-soft); color:#8A5719; }
+.dr-status.approved{ background: var(--brick-soft); color:#8C3330; }
+.dr-status.rejected{ background: var(--accent-soft); color:#0A5548; }
+.dr-reason{ font-size:12.5px; color: var(--ink-soft); max-width:220px; }
+.loading-banner{ text-align:center; padding:60px 20px; color: var(--ink-faint); font-size:13.5px; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<!-- 登入畫面：Supabase Auth + Google OAuth（僅限 @digitm.com.tw） -->
+<div class="login-scrim" id="loginScrim">
+  <div class="login-card">
+    <div class="mark">設</div>
+    <h2>設計組 CRM · 公司帳號登入</h2>
+    <div class="desc">請使用 @digitm.com.tw 公司 Google 帳號登入。業務只會看到自己的商機與白名單，主管可以看全組總覽。</div>
+    <button class="btn btn-primary" style="width:100%; padding:12px; margin-top:8px;" onclick="signInWithGoogle()">使用 Google 帳號登入</button>
+    <div class="login-foot" id="loginFoot">登入權限由後端 RLS 控制，不是只靠前端判斷</div>
+  </div>
+</div>
+
+<!-- 帳號已通過 Google 驗證，但沒有對應 CRM 身份 -->
+<div class="login-scrim" id="notEnabledScrim" style="display:none;">
+  <div class="login-card">
+    <div class="mark" style="background:linear-gradient(135deg,var(--brick),#8C3330);">！</div>
+    <h2>此公司帳號尚未啟用 CRM 權限</h2>
+    <div class="desc" id="notEnabledDesc">請聯絡主管開通權限。</div>
+    <button class="btn btn-ghost" style="width:100%;" onclick="signOut()">登出，換一個帳號</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand" id="brandBox">
+    <div class="mark" id="brandMark">設</div>
+    <div class="brand-text">
+      <h1>設計組 · CRM</h1>
+      <div class="sub" id="brandSub">客戶管理平台</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-primary" id="newOppBtn" onclick="openNewModal()">＋ 新增拜訪</button>
+    <div class="identity-chip" id="identityChip">
+      <div class="identity-avatar" id="idAvatar">趙</div>
+      <div>
+        <div class="identity-name" id="idName">趙斯蓓</div>
+        <div class="identity-role" id="idRole">業務</div>
+      </div>
+    </div>
+    <button class="switch-link" onclick="signOut()">登出</button>
+  </div>
+</div>
+
+<div class="page-nav">
+  <button class="page-nav-btn active" id="navCrm" onclick="switchPage('crm')">CRM</button>
+  <button class="page-nav-btn" id="navRecognition" onclick="switchPage('recognition')">商機</button>
+  <button class="page-nav-btn" id="navWhitelist" onclick="switchPage('whitelist')" style="display:none;">白名單開發</button>
+  <button class="page-nav-btn" id="navDeleteReview" onclick="switchPage('deleteReview')" style="display:none;">刪除申請</button>
+</div>
+
+<div class="wrap" id="pageCrm">
+
+  <div class="readonly-banner" id="roBanner" style="display:none;">
+    👁 主管檢視模式：可以查看全組商機與歷程，但無法修改資料
+  </div>
+
+  <!-- Manager rep summary -->
+  <div class="rep-summary" id="repSummaryBlock" style="display:none;">
+    <table>
+      <thead><tr><th>業務</th><th style="text-align:right">商機數</th><th style="text-align:right">提案總額</th><th style="text-align:right">潛在業績</th><th style="text-align:right">預計近期結案</th></tr></thead>
+      <tbody id="repSummaryBody"></tbody>
+    </table>
+    <div class="rep-summary-note">潛在業績＝進行中商機「提案金額 × 把握度」加總，計算規則待主管確認；點列可篩選下方清單</div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label" id="kpiActiveLbl">客戶</div><div class="value mono" id="kpiActive">0</div></div>
+    <div class="kpi"><div class="label">提案總金額</div><div class="value mono accent" id="kpiAmount">$0</div></div>
+    <div class="kpi"><div class="label">當季預計認列金額</div><div class="value mono" id="kpiWeighted">$0</div></div>
+    <div class="kpi"><div class="label">本週待追蹤</div><div class="value mono amber" id="kpiFollow">0</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="section-title" id="listTitle">商機清單</div>
+      <div class="pill-filter rep-pills" id="repFilterPills" style="display:none;"></div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <input class="search-box" id="searchBox" placeholder="搜尋客戶或提案內容…" oninput="render()">
+      <div class="pill-filter" id="stageFilter">
+        <button class="active" data-f="全部" onclick="setFilter('全部')">全部</button>
+        <button data-f="進行中" onclick="setFilter('進行中')">進行中</button>
+        <button data-f="初訪" onclick="setFilter('初訪')">初訪</button>
+        <button data-f="再訪" onclick="setFilter('再訪')">再訪</button>
+        <button data-f="提案" onclick="setFilter('提案')">提案</button>
+        <button data-f="結案" onclick="setFilter('結案')">結案</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead id="tableHead">
+        <tr>
+          <th style="width:23%">客戶/提案內容</th>
+          <th id="ownerColHead" style="display:none; width:10%;">負責業務</th>
+          <th style="width:11%">目前階段</th>
+          <th style="width:12%; text-align:right">提案金額</th>
+          <th style="width:11%">把握度</th>
+          <th style="width:13%">下次追蹤</th>
+          <th style="width:12%">預計結案</th>
+          <th style="width:8%">結果</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="big">目前沒有符合條件的商機</div>
+      <div>試著調整篩選條件，或新增一筆商機</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ 商機／業績認列 頁 ============ -->
+<div class="wrap" id="pageRecognition" style="display:none;">
+
+  <div class="readonly-banner" id="roBannerRec">
+    👁 本頁僅供檢視：所有數字直接讀取 CRM 同一筆商機資料，把握度與當季認列 % 請至 CRM 商機詳細頁修改
+  </div>
+
+  <div class="rec-header">
+    <div>
+      <div class="rec-title">商機／預計認列</div>
+      <div class="rec-sub">同一份商機資料，金額與客戶資訊直接帶入原本 CRM，不另存第二份。</div>
+    </div>
+    <div class="rec-header-right">
+      <span class="rec-quarter" id="recQuarter">2026 Q3</span>
+      <span class="rec-scope" id="recScopeLabel">趙斯蓓</span>
+    </div>
+  </div>
+
+  <div class="rec-filter-row" id="repFilterRowRec" style="display:none;">
+    <span class="rec-filter-label">業務</span>
+    <div class="pill-filter rep-pills" id="repFilterPillsRec"></div>
+  </div>
+
+  <div class="rec-filter-row">
+    <span class="rec-filter-label">縣市</span>
+    <div class="rec-chips" id="cityChips"></div>
+  </div>
+  <div class="rec-filter-row" id="districtFilterRow" style="display:none;">
+    <span class="rec-filter-label">地區</span>
+    <div class="rec-chips" id="districtChips"></div>
+  </div>
+
+  <div class="rec-table-card" id="recTableCard">
+    <!-- rendered by JS: group headers + tables + subtotal rows -->
+  </div>
+
+  <div class="rec-empty" id="recEmpty" style="display:none;">
+    目前篩選範圍內沒有商機資料
+  </div>
+
+  <div class="rec-footnote">
+    地區資料來源待工程串接／規則待確認．商機 ID 待工程師串接正式編碼．本頁所有欄位皆為唯讀，數值同步自 CRM
+  </div>
+
+</div>
+
+<!-- ============ 白名單開發 頁（獨立模組） ============ -->
+<div class="wrap" id="pageWhitelist" style="display:none;">
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="section-title">白名單開發</div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <input class="search-box" id="wlSearchBox" placeholder="搜尋公司id／簡稱／名稱…" oninput="renderWhitelistPage()">
+      <div class="pill-filter" id="wlStatusFilter">
+        <button class="active" data-f="待開發" onclick="setWlFilter('待開發')">待開發</button>
+        <button data-f="已轉拜訪" onclick="setWlFilter('已轉拜訪')">已轉拜訪</button>
+        <button data-f="無法聯繫" onclick="setWlFilter('無法聯繫')">無法聯繫</button>
+        <button data-f="排除" onclick="setWlFilter('排除')">排除</button>
+        <button data-f="全部" onclick="setWlFilter('全部')">全部</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:11%">公司id</th>
+          <th style="width:16%">公司簡稱</th>
+          <th style="width:20%">公司名稱</th>
+          <th style="width:10%">所在地（主）</th>
+          <th style="width:14%">最近開發結果</th>
+          <th style="width:11%">下次追蹤</th>
+          <th style="width:8%; text-align:center">開發次數</th>
+          <th style="width:10%">狀態</th>
+        </tr>
+      </thead>
+      <tbody id="wlTableBody"></tbody>
+    </table>
+    <div class="empty-state" id="wlEmptyState" style="display:none;">
+      <div class="big">沒有符合條件的白名單公司</div>
+      <div>試著調整篩選條件或搜尋關鍵字</div>
+    </div>
+  </div>
+
+  <div class="rec-footnote">白名單資料任何情況都不會被刪除，只會改變狀態。正式白名單匯入方式待工程串接。</div>
+
+</div>
+
+<!-- ============ 刪除申請（業務：自己送出的申請；主管：全組審核） ============ -->
+<div class="wrap" id="pageDeleteReview" style="display:none;">
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="section-title" id="drTitle">刪除申請</div>
+    </div>
+    <div class="pill-filter" id="drStatusFilter">
+      <button class="active" data-f="pending" onclick="setDrFilter('pending')">待審核</button>
+      <button data-f="approved" onclick="setDrFilter('approved')">已核准</button>
+      <button data-f="rejected" onclick="setDrFilter('rejected')">已拒絕</button>
+      <button data-f="全部" onclick="setDrFilter('全部')">全部</button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>客戶</th>
+          <th>負責業務</th>
+          <th>客戶來源</th>
+          <th>刪除原因</th>
+          <th>申請人／時間</th>
+          <th>狀態</th>
+          <th id="drActionHead" style="display:none;">審核</th>
+        </tr>
+      </thead>
+      <tbody id="drTableBody"></tbody>
+    </table>
+    <div class="empty-state" id="drEmptyState" style="display:none;">
+      <div class="big">目前沒有符合條件的刪除申請</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 主管審核 Modal -->
+<div class="modal-scrim" id="drReviewScrim">
+  <div class="modal">
+    <h3 id="drReviewTitle">審核刪除申請</h3>
+    <div class="modal-sub" id="drReviewSub">—</div>
+    <div class="field full"><label>審核備註（選填）</label><textarea id="drReviewNote" rows="2" placeholder="留給紀錄用的備註"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeDrReviewModal()">取消</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDrReject()">拒絕</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmDrApprove()">核准並刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 業務：申請刪除 Modal -->
+<div class="modal-scrim" id="deleteReqScrim">
+  <div class="modal">
+    <h3>申請刪除商機</h3>
+    <div class="modal-sub" id="deleteReqSub">—</div>
+    <div class="field full"><label>刪除原因 *</label><textarea id="deleteReqReason" rows="2" placeholder="請說明為什麼要刪除這筆商機"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeDeleteReqModal()">取消</button>
+      <button class="btn btn-danger" style="flex:1" onclick="submitDeleteRequest()">送出申請</button>
+    </div>
+  </div>
+</div>
+
+<!-- 白名單詳細頁 -->
+<div class="scrim" id="wlScrim" onclick="closeWlPanel()"></div>
+<div class="panel" id="wlPanel">
+  <div class="panel-head">
+    <div>
+      <h2 id="wlDCompany">—</h2>
+      <div class="proj" id="wlDSub">—</div>
+    </div>
+    <button class="close-btn" onclick="closeWlPanel()">✕</button>
+  </div>
+  <div class="panel-body">
+
+    <div class="owner-row">
+      <div><span class="lbl">狀態</span><span class="val" id="wlDStatus">—</span></div>
+      <div><span class="lbl">開發次數</span><span class="val" id="wlDCount">0</span></div>
+    </div>
+
+    <div class="block-title">基本資料</div>
+    <div class="field-grid">
+      <div class="field"><label>公司id</label><div class="ro-text mono" id="wlDCompanyId">—</div></div>
+      <div class="field"><label>公司簡稱</label><div class="ro-text" id="wlDShortName">—</div></div>
+      <div class="field full"><label>公司名稱</label><div class="ro-text" id="wlDFullName">—</div></div>
+      <div class="field"><label>所在地（主）</label><div class="ro-text" id="wlDCity">—</div></div>
+      <div class="field"><label>負責業務</label><div class="ro-text" id="wlDOwner">—</div></div>
+    </div>
+
+    <div id="wlExcludeInfoBox" style="display:none;">
+      <div class="block-title">排除資訊</div>
+      <div class="field-grid">
+        <div class="field"><label>排除原因</label><div class="ro-text" id="wlDExcludeReason">—</div></div>
+        <div class="field"><label>排除時間</label><div class="ro-text" id="wlDExcludeTime">—</div></div>
+        <div class="field full"><label>補充說明</label><div class="ro-text" id="wlDExcludeNote">—</div></div>
+        <div class="field"><label>操作者</label><div class="ro-text" id="wlDExcludeOperator">—</div></div>
+      </div>
+    </div>
+
+    <div id="wlLinkedBox" style="display:none;">
+      <div class="block-title">CRM 關聯</div>
+      <div class="field full"><label>已建立商機</label><div class="ro-text" id="wlDLinkedOpp">—</div></div>
+    </div>
+
+    <div class="block-title">開發歷程</div>
+    <div class="timeline" id="wlTimeline"></div>
+
+    <div class="add-visit-box" id="wlAddBox">
+      <div class="toggle-add" onclick="toggleWlAddForm()"><span class="plus" id="wlAddPlus">＋</span> 新增開發紀錄</div>
+      <div class="add-visit-form" id="wlAddForm">
+        <div class="field-grid">
+          <div class="field"><label>開發日期 *</label><input id="wlHDate" type="date"></div>
+          <div class="field"><label>開發結果 *</label>
+            <select id="wlHResult">
+              <option value="未接">未接</option>
+              <option value="已接通無需求">已接通無需求</option>
+              <option value="已接通待追蹤">已接通待追蹤</option>
+              <option value="有意願轉商機">有意願轉商機</option>
+            </select>
+          </div>
+          <div class="field full"><label>開發紀錄</label><textarea id="wlHNote" rows="2" placeholder="這次聯絡狀況…"></textarea></div>
+          <div class="field"><label>下次追蹤日期</label><input id="wlHFollow" type="date"></div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="addWlHistory()">儲存紀錄</button>
+      </div>
+    </div>
+
+    <div class="panel-footer" id="wlPanelFooter">
+      <button class="btn btn-primary" id="wlConvertBtn" style="flex:1" onclick="convertToVisit()">轉為拜訪</button>
+      <button class="btn btn-danger" onclick="openExcludeModal()">排除</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- 排除原因 Modal -->
+<div class="modal-scrim" id="wlExcludeScrim">
+  <div class="modal">
+    <h3>排除白名單公司</h3>
+    <div class="modal-sub" id="wlExcludeCompanyLabel">—</div>
+    <div class="field">
+      <label>排除原因</label>
+      <select id="wlExcludeReason" onchange="onExcludeReasonChange()">
+        <option value="重複公司">重複公司</option>
+        <option value="停止營業">停止營業</option>
+        <option value="既有客戶">既有客戶</option>
+        <option value="非目標客群">非目標客群</option>
+        <option value="資料錯誤">資料錯誤</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="field full" id="wlExcludeNoteBox" style="display:none;">
+      <label>補充說明 *</label>
+      <textarea id="wlExcludeNote" rows="2" placeholder="選擇「其他」時必填"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeExcludeModal()">取消</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmExclude()">確認排除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="scrim" id="scrim" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-head">
+    <div>
+      <h2 id="dCustomer">—</h2>
+      <div class="proj" id="dProject">—</div>
+    </div>
+    <button class="close-btn" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody">
+
+    <div class="owner-row">
+      <div>
+        <span class="lbl">負責業務</span>
+        <span class="val" id="ownerDisplay">—</span>
+      </div>
+      <div id="transferBox" style="display:none;">
+        <select id="transferSelect" onchange="transferOpp()"></select>
+      </div>
+    </div>
+
+    <div class="block-title">A. 基本資料</div>
+    <div class="field-grid">
+      <div class="field"><label>客戶名稱</label><input id="fCustomer" oninput="draftField()"></div>
+      <div class="field"><label>縣市</label><select id="fCity" onchange="onCityChange()"></select></div>
+      <div class="field"><label>行政區</label><select id="fDistrict" onchange="draftField()"></select></div>
+      <div class="field"><label>商機建立日期</label><div class="ro-text" id="dCreatedDate">—</div></div>
+      <div class="field"><label>商機 ID</label><div class="ro-text" id="dOppId">—</div></div>
+      <div class="field"><label>客戶來源</label><div class="ro-text" id="dSourceType">自行開發</div></div>
+    </div>
+    <div class="field-grid" id="dWhitelistInfoBox" style="display:none;">
+      <div class="field"><label>白名單公司id</label><div class="ro-text mono" id="dWlCompanyId">—</div></div>
+      <div class="field"><label>白名單公司簡稱</label><div class="ro-text" id="dWlShortName">—</div></div>
+      <div class="field"><label>白名單公司名稱</label><div class="ro-text" id="dWlFullName">—</div></div>
+      <div class="field"><label>白名單所在地（主）</label><div class="ro-text" id="dWlCity">—</div></div>
+    </div>
+
+    <div class="block-title">B. 拜訪歷程</div>
+    <div class="timeline" id="timeline"></div>
+
+    <div class="add-visit-box" id="addVisitBox">
+      <div class="toggle-add" onclick="toggleAddForm()"><span class="plus" id="addPlus">＋</span> 新增拜訪紀錄</div>
+      <div class="add-visit-form" id="addVisitForm">
+        <div class="field-grid">
+          <div class="field"><label>拜訪時間</label><input id="vDate" type="date"></div>
+          <div class="field"><label>拜訪重點</label>
+            <select id="vType" onchange="onVisitTypeChange()"><option>初訪</option><option>再訪</option><option>提案</option><option>結案</option></select>
+          </div>
+          <div class="field full" id="vResultField" style="display:none;">
+            <label>結案結果</label>
+            <select id="vResult"><option value="">請選擇</option><option value="won">成交</option><option value="lost">未成交</option></select>
+          </div>
+          <div class="field full"><label>本次紀錄內容</label><textarea id="vContent" rows="2" placeholder="例如：客戶目前有預算，但希望方案拆成兩階段執行…"></textarea></div>
+          <div class="field"><label>下一步行動</label><input id="vNext" placeholder="例如：8/10 前提供第二版提案"></div>
+          <div class="field"><label>下次追蹤日期</label><input id="vFollow" type="date"></div>
+        </div>
+
+        <div class="field-grid vproposal-fields" id="vProposalFields" style="display:none;">
+          <div class="field full"><label>提案內容 *</label><input id="vProject" placeholder="這次提出的方案內容"></div>
+          <div class="field"><label>提案金額 (NT$) *</label><input id="vAmount" class="mono" type="number"></div>
+          <div class="field"><label>把握度 *</label><select id="vConfidence"></select></div>
+          <div class="field"><label>當季業績預計認列 % *</label><input id="vRecognition" class="mono" type="number" min="0" max="100"></div>
+          <div class="field full"><label>預計簽約日期 *</label><input id="vCloseDate" type="date"></div>
+        </div>
+
+        <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="addVisit()">儲存紀錄</button>
+      </div>
+    </div>
+
+    <div class="block-title">C. 提案內容</div>
+    <div class="block-hint">此區顯示最新一次「提案」拜訪紀錄的資料，唯讀。要修改請回到上方「拜訪歷程」新增一筆提案類型的拜訪紀錄</div>
+    <div class="field-grid">
+      <div class="field full"><label>提案內容</label><div class="ro-text" id="dProjectText">（尚未提出提案）</div></div>
+      <div class="field"><label>提案金額 (NT$)</label><div class="ro-text mono" id="dAmountText">—</div></div>
+      <div class="field"><label>把握度</label><div class="ro-text" id="dConfidenceText">—</div></div>
+      <div class="field"><label>當季業績預計認列 %</label><div class="ro-text mono" id="dRecognitionText">—</div></div>
+      <div class="field"><label>預計簽約日期</label><div class="ro-text" id="dCloseDateText">—</div></div>
+      <div class="field full pred-field"><label>預計當季認列金額</label><div class="ro-text pred-text" id="dPredicted">$0</div></div>
+    </div>
+
+    <div class="panel-footer" id="panelFooter">
+      <button class="btn btn-primary" style="flex:1" onclick="saveOpp()">儲存</button>
+      <button class="btn btn-danger" id="deleteOppBtn" onclick="openDeleteReqModal()">申請刪除商機</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- New Opportunity Modal -->
+<div class="modal-scrim" id="modalScrim">
+  <div class="modal">
+    <h3>新增拜訪</h3>
+    <div class="modal-sub">將建立在「<span id="newOppOwnerLabel">—</span>」名下・提案內容、金額、把握度可以之後再補</div>
+    <div class="field" id="nSourceTypeBox">
+      <label>客戶來源</label>
+      <select id="nSourceType" onchange="onSourceTypeChange()">
+        <option value="self">自行開發</option>
+        <option value="whitelist">白名單</option>
+      </select>
+    </div>
+    <div class="field full" id="nWhitelistBox" style="display:none;">
+      <label>選擇白名單公司（僅顯示「待開發」）</label>
+      <input id="nWlSearch" placeholder="搜尋公司id／簡稱／名稱" oninput="renderWlPicker()">
+      <div class="wl-picker-results" id="nWlPickerResults"></div>
+      <div class="wl-picker-selected" id="nWlPickerSelected" style="display:none;"></div>
+    </div>
+    <div class="field"><label>客戶名稱</label><input id="nCustomer" placeholder="例如：ABC 公司"></div>
+    <div class="field"><label>縣市</label><select id="nCity" onchange="onNewCityChange()"></select></div>
+    <div class="field"><label>行政區</label><select id="nDistrict"></select></div>
+    <div class="field"><label>初訪日期</label><input id="nDate" type="date"></div>
+    <div class="field"><label>初訪紀錄</label><textarea id="nNote" rows="2" placeholder="這次拜訪了解到的重點…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeNewModal()">取消</button>
+      <button class="btn btn-primary" style="flex:1" onclick="createOpp()">建立拜訪</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Supabase 連線設定 — 請填入實際 Project URL 與 anon key
+   （anon key 放前端是安全的，真正的權限限制在後端 RLS，不在這裡）
+   ============================================================ */
+const SUPABASE_URL = 'https://zuezoqtxmzropbdydtzj.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_llNZiS_En6QDXiUqP-xILA_HTur8f9D';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const COMPANY_EMAIL_DOMAIN = '@digitm.com.tw';
+
+let REPS = []; // 動態從 team_members 載入（role='rep'），不再寫死姓名
+const STAGES = ['初訪','再訪','提案','結案'];
+
+let state = { opps: [], filter: '全部', repFilter: '全部', activeId: null, identity: null, role: null, teamMemberId: null, page: 'crm', recCity: '全部', recDistrict: '全部', draft: null, whitelist: [], wlFilter: '待開發', wlActiveId: null, teamMembers: [], deleteRequests: [], drFilter: 'pending', drActiveId: null, drPendingAction: null };
+let recGroupMap = {}; // groupKey -> [oppId,...], rebuilt every render, used for instant subtotal recalculation
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function addDays(n){ const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function fmtMoney(n){ if(n===null||n===undefined||n==='') return '—'; return '$'+Number(n).toLocaleString('en-US'); }
+function daysUntil(dateStr){ if(!dateStr) return null; const d = new Date(dateStr+'T00:00:00'); const t = new Date(); t.setHours(0,0,0,0); return Math.round((d-t)/86400000); }
+function esc(s){ const d=document.createElement('div'); d.textContent=s??''; return d.innerHTML; }
+function isManager(){ return state.role === 'manager'; }
+function teamMemberName(id){ const t = state.teamMembers.find(x=>x.id===id); return t ? t.display_name : '—'; }
+function teamMemberIdByName(name){ const t = state.teamMembers.find(x=>x.display_name===name); return t ? t.id : null; }
+
+/* ---------- 商機／業績認列：設定資料 ----------
+   地區資料來源待工程串接／規則待確認 — city/district 目前僅作原型篩選示範
+*/
+const CONFIDENCE_LEVELS = [
+  { label:'沒有', value:0 },
+  { label:'低', value:25 },
+  { label:'一般', value:50 },
+  { label:'高', value:75 },
+  { label:'極高', value:90 },
+  { label:'完整', value:100 }
+];
+function confidenceLabel(v){
+  const f = CONFIDENCE_LEVELS.find(c=>c.value===Number(v));
+  return f ? `${f.label}(${f.value}%)` : `${v||0}%`;
+}
+function shortConfidenceLabel(v){
+  const f = CONFIDENCE_LEVELS.find(c=>c.value===Number(v));
+  return f ? `${f.label} ${f.value}%` : `${v||0}%`;
+}
+
+// 集中管理的台灣縣市／行政區清單（原型示範資料，正式來源待確認）
+const TAIWAN_REGIONS = {
+  '台北市': ['中正區','大同區','中山區','松山區','大安區','萬華區','信義區','士林區','北投區','內湖區','南港區','文山區'],
+  '新北市': ['板橋區','三重區','中和區','永和區','新莊區','新店區','樹林區','鶯歌區','三峽區','淡水區','汐止區','瑞芳區','土城區','蘆洲區','五股區','泰山區','林口區','深坑區','石碇區','坪林區','三芝區','石門區','八里區','平溪區','雙溪區','貢寮區','金山區','萬里區','烏來區'],
+  '桃園市': ['桃園區','中壢區','平鎮區','八德區','楊梅區','蘆竹區','大溪區','龍潭區','龜山區','大園區','觀音區','新屋區','復興區'],
+  '台中市': ['中區','東區','南區','西區','北區','北屯區','西屯區','南屯區','太平區','大里區','霧峰區','烏日區','豐原區','后里區','石岡區','東勢區','和平區','新社區','潭子區','大雅區','神岡區','大肚區','沙鹿區','龍井區','梧棲區','清水區','大甲區','外埔區','大安區'],
+  '台南市': ['中西區','東區','南區','北區','安平區','安南區','永康區','歸仁區','新化區','左鎮區','玉井區','楠西區','南化區','仁德區','關廟區','龍崎區','官田區','麻豆區','佳里區','西港區','七股區','將軍區','學甲區','北門區','新營區','後壁區','白河區','東山區','六甲區','下營區','柳營區','鹽水區','善化區','大內區','山上區','新市區','安定區'],
+  '高雄市': ['楠梓區','左營區','鼓山區','三民區','鹽埕區','前金區','新興區','苓雅區','前鎮區','旗津區','小港區','鳳山區','大寮區','鳥松區','林園區','仁武區','大樹區','大社區','岡山區','路竹區','橋頭區','梓官區','彌陀區','永安區','燕巢區','田寮區','阿蓮區','茄萣區','湖內區','旗山區','美濃區','內門區','杉林區','甲仙區','六龜區','桃源區','那瑪夏區','茂林區'],
+  '基隆市': ['仁愛區','信義區','中正區','中山區','安樂區','暖暖區','七堵區'],
+  '新竹市': ['東區','北區','香山區'],
+  '嘉義市': ['東區','西區'],
+  '新竹縣': ['竹北市','竹東鎮','新埔鎮','關西鎮','湖口鄉','新豐鄉','芎林鄉','橫山鄉','北埔鄉','寶山鄉','峨眉鄉','尖石鄉','五峰鄉'],
+  '苗栗縣': ['苗栗市','苑裡鎮','通霄鎮','竹南鎮','頭份市','後龍鎮','卓蘭鎮','大湖鄉','公館鄉','銅鑼鄉','南庄鄉','頭屋鄉','三義鄉','西湖鄉','造橋鄉','三灣鄉','獅潭鄉','泰安鄉'],
+  '彰化縣': ['彰化市','鹿港鎮','和美鎮','線西鄉','伸港鄉','福興鄉','秀水鄉','花壇鄉','芬園鄉','員林市','溪湖鎮','田中鎮','大村鄉','埔鹽鄉','埔心鄉','永靖鄉','社頭鄉','二水鄉','北斗鎮','二林鎮','田尾鄉','埤頭鄉','芳苑鄉','大城鄉','竹塘鄉','溪州鄉'],
+  '南投縣': ['南投市','埔里鎮','草屯鎮','竹山鎮','集集鎮','名間鄉','鹿谷鄉','中寮鄉','魚池鄉','國姓鄉','水里鄉','信義鄉','仁愛鄉'],
+  '雲林縣': ['斗六市','斗南鎮','虎尾鎮','西螺鎮','土庫鎮','北港鎮','古坑鄉','大埤鄉','莿桐鄉','林內鄉','二崙鄉','崙背鄉','麥寮鄉','東勢鄉','褒忠鄉','台西鄉','元長鄉','四湖鄉','口湖鄉','水林鄉'],
+  '嘉義縣': ['太保市','朴子市','布袋鎮','大林鎮','民雄鄉','溪口鄉','新港鄉','六腳鄉','東石鄉','義竹鄉','鹿草鄉','水上鄉','中埔鄉','竹崎鄉','梅山鄉','番路鄉','大埔鄉','阿里山鄉'],
+  '屏東縣': ['屏東市','潮州鎮','東港鎮','恆春鎮','萬丹鄉','長治鄉','麟洛鄉','九如鄉','里港鄉','鹽埔鄉','高樹鄉','萬巒鄉','內埔鄉','竹田鄉','新埤鄉','枋寮鄉','新園鄉','崁頂鄉','林邊鄉','南州鄉','佳冬鄉','琉球鄉','車城鄉','滿州鄉','枋山鄉','三地門鄉','霧台鄉','瑪家鄉','泰武鄉','來義鄉','春日鄉','獅子鄉','牡丹鄉'],
+  '宜蘭縣': ['宜蘭市','羅東鎮','蘇澳鎮','頭城鎮','礁溪鄉','壯圍鄉','員山鄉','冬山鄉','五結鄉','三星鄉','大同鄉','南澳鄉'],
+  '花蓮縣': ['花蓮市','鳳林鎮','玉里鎮','新城鄉','吉安鄉','壽豐鄉','秀林鄉','光復鄉','豐濱鄉','瑞穗鄉','萬榮鄉','富里鄉','卓溪鄉'],
+  '台東縣': ['台東市','成功鎮','關山鎮','卑南鄉','大武鄉','太麻里鄉','東河鄉','長濱鄉','鹿野鄉','池上鄉','綠島鄉','達仁鄉','金峰鄉','海端鄉','延平鄉','蘭嶼鄉'],
+  '澎湖縣': ['馬公市','湖西鄉','白沙鄉','西嶼鄉','望安鄉','七美鄉'],
+  '金門縣': ['金城鎮','金湖鎮','金沙鎮','金寧鄉','烈嶼鄉','烏坵鄉'],
+  '連江縣': ['南竿鄉','北竿鄉','莒光鄉','東引鄉']
+};
+
+/* ============================================================
+   Auth — Supabase Auth + Google OAuth（僅限 @digitm.com.tw 公司帳號）
+   ============================================================ */
+async function signInWithGoogle(){
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + window.location.pathname,
+      queryParams: { hd: 'digitm.com.tw', prompt: 'select_account' } // 僅 UX 提示，真正限制在 RLS
+    }
+  });
+  if(error) alert('登入失敗：' + error.message);
+}
+async function signOut(){
+  await sb.auth.signOut();
+  location.reload();
+}
+function showLoginScreen(){
+  document.getElementById('loginScrim').classList.add('show');
+  document.getElementById('notEnabledScrim').classList.remove('show');
+}
+function showNotEnabledScreen(desc){
+  document.getElementById('notEnabledDesc').textContent = desc;
+  document.getElementById('notEnabledScrim').classList.add('show');
+  document.getElementById('loginScrim').classList.remove('show');
+}
+function hideAllLoginScreens(){
+  document.getElementById('loginScrim').classList.remove('show');
+  document.getElementById('notEnabledScrim').classList.remove('show');
+}
+
+async function initAuth(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ showLoginScreen(); return; }
+
+  const email = (session.user.email || '').toLowerCase();
+  if(!email.endsWith(COMPANY_EMAIL_DOMAIN)){
+    showNotEnabledScreen(`這個帳號（${email}）不是公司網域帳號，請登出後改用 ${COMPANY_EMAIL_DOMAIN} 的 Google 帳號登入。`);
+    return;
+  }
+
+  // 前端這裡的網域檢查只是 UX，真正擋非公司帳號讀資料的是 RLS：
+  // profiles_email_domain check + auth_team_member_id() 內的 email ilike 過濾
+  const { data, error } = await sb.rpc('rpc_current_identity');
+  if(error){
+    showNotEnabledScreen(`讀取身份時發生錯誤：${error.message}`);
+    return;
+  }
+  if(!data || !data.length){
+    showNotEnabledScreen(`此公司帳號尚未啟用 CRM 權限，請聯絡主管。（${email}）`);
+    return;
+  }
+
+  const me = data[0];
+  state.teamMemberId = me.team_member_id;
+  state.identity = me.display_name;
+  state.role = me.role;
+  hideAllLoginScreens();
+  await bootstrapApp();
+}
+
+async function bootstrapApp(){
+  await loadTeamMembers();
+  applyIdentityUI();
+  await Promise.all([ loadOpportunities(), loadWhitelist(), loadDeleteRequests() ]);
+  render();
+}
+
+/* ============================================================
+   資料層：Supabase 為唯一 Source of Truth（CRM／拜訪／白名單／開發歷程／
+   刪除申請）。以下 load* 負責把 DB 的 snake_case 欄位轉成畫面既有邏輯
+   使用的欄位名稱，讓 render()／openPanel() 等既有函式完全不用改。
+   ============================================================ */
+async function loadTeamMembers(){
+  const { data, error } = await sb.from('team_members').select('id, display_name, role, is_active').eq('is_active', true).order('display_name');
+  if(error){ console.error(error); alert('讀取業務名單失敗：' + error.message); return; }
+  state.teamMembers = data || [];
+  REPS = state.teamMembers.filter(t=>t.role==='rep').map(t=>t.display_name);
+}
+
+function mapOppRow(row){
+  const visits = (row.visits||[]).slice()
+    .sort((a,b)=> (a.created_at||'').localeCompare(b.created_at||''))
+    .map(v=>({
+      id: v.id, date: v.visit_date, type: v.visit_type, content: v.content||'',
+      next: v.next_action||'', follow: v.next_follow_date||null,
+      project: v.project ?? undefined, amount: v.amount ?? undefined,
+      confidenceLevel: v.confidence_level ?? undefined, recognitionRate: v.recognition_rate ?? undefined,
+      closeDate: v.close_date ?? undefined, dealResult: v.deal_result ?? undefined
+    }));
+  const wl = row.whitelist_companies;
+  return {
+    id: row.id,
+    opportunityId: row.opportunity_id || '',
+    customer: row.customer_name,
+    owner: teamMemberName(row.owner_id),
+    ownerId: row.owner_id,
+    sourceType: row.source_type,
+    whitelistRefId: row.whitelist_company_id,
+    whitelistSnapshot: wl ? { companyId: wl.company_id, shortName: wl.short_name, fullName: wl.full_name, city: wl.city } : null,
+    city: row.city, district: row.district, stage: row.stage,
+    project: row.project || '', amount: row.amount ?? '',
+    confidenceLevel: row.confidence_level, recognitionRate: row.recognition_rate,
+    closeDate: row.close_date || '', dealResult: row.deal_result,
+    createdDate: row.created_at ? row.created_at.slice(0,10) : '',
+    visits
+  };
+}
+async function loadOpportunities(){
+  const { data, error } = await sb
+    .from('opportunities')
+    .select('*, visits(*), whitelist_companies!whitelist_company_id(company_id, short_name, full_name, city)')
+    .order('created_at', { ascending:false });
+  if(error){ console.error(error); alert('讀取商機資料失敗：' + error.message); return; }
+  state.opps = (data||[]).map(mapOppRow);
+}
+async function refreshOneOpportunity(id){
+  const { data, error } = await sb
+    .from('opportunities')
+    .select('*, visits(*), whitelist_companies!whitelist_company_id(company_id, short_name, full_name, city)')
+    .eq('id', id).maybeSingle();
+  if(error || !data) return;
+  const fresh = mapOppRow(data);
+  const idx = state.opps.findIndex(o=>o.id===id);
+  if(idx>=0) state.opps[idx] = fresh; else state.opps.unshift(fresh);
+  return fresh;
+}
+
+/* ---------- 白名單開發 ---------- */
+const WL_STATUS_LABELS = { pending:'待開發', converted:'已轉拜訪', unreachable:'無法聯繫', excluded:'排除' };
+const WL_STATUS_BY_LABEL = { '待開發':'pending', '已轉拜訪':'converted', '無法聯繫':'unreachable', '排除':'excluded' };
+const WL_RESULT_OPTIONS = ['未接','已接通無需求','已接通待追蹤','有意願轉商機'];
+const WL_EXCLUDE_REASONS = ['重複公司','停止營業','既有客戶','非目標客群','資料錯誤','其他'];
+
+function canSeeWhitelist(){ return !!state.role; } // rep 與 manager 都看得到，manager 唯讀
+function wlStatusLabel(s){ return WL_STATUS_LABELS[s] || s; }
+
+function mapWlRow(row){
+  const history = (row.whitelist_histories||[]).slice()
+    .sort((a,b)=> (a.contact_date||'').localeCompare(b.contact_date||'') || (a.created_at||'').localeCompare(b.created_at||''));
+  return {
+    id: row.id, companyId: row.company_id, shortName: row.short_name||'', fullName: row.full_name,
+    city: row.city, owner: teamMemberName(row.owner_id), ownerId: row.owner_id,
+    status: row.status,
+    history: history.map(h=>({ id:h.id, date:h.contact_date, result:h.result, note:h.note||'', follow:h.next_follow_date||null })),
+    excludeInfo: row.status==='excluded' ? {
+      reason: row.exclude_reason, note: row.exclude_note || '',
+      time: row.excluded_at ? row.excluded_at.slice(0,16).replace('T',' ') : '',
+      operator: row.excluded_by ? teamMemberName(row.excluded_by) : ''
+    } : null,
+    linkedOppId: row.linked_opportunity_id,
+    createdDate: row.created_at ? row.created_at.slice(0,10) : ''
+  };
+}
+async function loadWhitelist(){
+  const { data, error } = await sb
+    .from('whitelist_companies')
+    .select('*, whitelist_histories(*)')
+    .order('created_at', { ascending:false });
+  if(error){ console.error(error); alert('讀取白名單資料失敗：' + error.message); return; }
+  state.whitelist = (data||[]).map(mapWlRow);
+}
+async function refreshOneWhitelist(id){
+  const { data, error } = await sb.from('whitelist_companies').select('*, whitelist_histories(*)').eq('id', id).maybeSingle();
+  if(error || !data) return;
+  const fresh = mapWlRow(data);
+  const idx = state.whitelist.findIndex(w=>w.id===id);
+  if(idx>=0) state.whitelist[idx] = fresh; else state.whitelist.unshift(fresh);
+  return fresh;
+}
+function wlLastHistory(w){ return w.history.length ? w.history[w.history.length-1] : null; }
+function wlNextFollowInfo(w){
+  const last = wlLastHistory(w);
+  if(!last || !last.follow) return {label:'—', cls:'none'};
+  if(w.status!=='pending') return {label:last.follow, cls:'none'};
+  const d = daysUntil(last.follow);
+  if(d<0) return {label:last.follow+' (逾期)', cls:'overdue'};
+  if(d<=3) return {label:last.follow, cls:'soon'};
+  return {label:last.follow, cls:''};
+}
+function getWlScope(){
+  if(isManager()){
+    if(state.repFilter==='全部') return state.whitelist;
+    return state.whitelist.filter(w=>w.owner===state.repFilter);
+  }
+  return state.whitelist.filter(w=>w.owner===state.identity);
+}
+
+/* ---------- 刪除申請 ---------- */
+function mapDrRow(row){
+  return {
+    id: row.id, opportunityId: row.opportunity_id, snapshot: row.opportunity_snapshot,
+    requestedById: row.requested_by, requestedBy: teamMemberName(row.requested_by),
+    reason: row.reason, status: row.status,
+    reviewedById: row.reviewed_by, reviewedBy: row.reviewed_by ? teamMemberName(row.reviewed_by) : null,
+    reviewNote: row.review_note, requestedAt: row.requested_at, reviewedAt: row.reviewed_at
+  };
+}
+async function loadDeleteRequests(){
+  const { data, error } = await sb.from('delete_requests').select('*').order('requested_at', { ascending:false });
+  if(error){ console.error(error); return; }
+  state.deleteRequests = (data||[]).map(mapDrRow);
+}
+
+/* ---------- 身份 UI ---------- */
+function applyIdentityUI(){
+  const mgr = isManager();
+  document.getElementById('brandBox').classList.toggle('mgr', mgr);
+  document.getElementById('brandMark').textContent = mgr ? '主' : state.identity[0];
+  document.getElementById('brandSub').textContent = mgr ? '主管全覽 Dashboard' : '客戶管理平台';
+  document.getElementById('idAvatar').textContent = mgr ? '主' : state.identity[0];
+  document.getElementById('idName').textContent = mgr ? '主管檢視' : state.identity;
+  document.getElementById('idRole').textContent = mgr ? '唯讀・全組' : '業務';
+  document.getElementById('identityChip').classList.toggle('mgr', mgr);
+  document.getElementById('newOppBtn').style.display = mgr ? 'none' : 'inline-block';
+  document.getElementById('roBanner').style.display = mgr ? 'flex' : 'none';
+  document.getElementById('repSummaryBlock').style.display = mgr ? 'block' : 'none';
+  document.getElementById('repFilterPills').style.display = mgr ? 'flex' : 'none';
+  document.getElementById('ownerColHead').style.display = mgr ? 'table-cell' : 'none';
+  document.getElementById('listTitle').textContent = mgr ? '全組商機清單' : '我的商機清單';
+  document.getElementById('kpiActiveLbl').textContent = mgr ? (state.repFilter==='全部' ? '全組客戶' : state.repFilter+'・客戶') : '客戶';
+  document.getElementById('repFilterRowRec').style.display = mgr ? 'flex' : 'none';
+  document.getElementById('navWhitelist').style.display = canSeeWhitelist() ? 'inline-block' : 'none';
+  document.getElementById('navDeleteReview').style.display = isManager() ? 'inline-block' : 'none';
+  if(!canSeeWhitelist() && state.page==='whitelist'){ switchPage('crm'); }
+
+  if(mgr){
+    document.getElementById('repFilterPills').innerHTML = ['全部',...REPS].map(r=>
+      `<button class="${state.repFilter===r?'active':''}" onclick="setRepFilter('${r}')">${r}</button>`
+    ).join('');
+    document.getElementById('repFilterPillsRec').innerHTML = ['全部',...REPS].map(r=>
+      `<button class="${state.repFilter===r?'active':''}" onclick="setRepFilter('${r}')">${r}</button>`
+    ).join('');
+  }
+}
+function setRepFilter(r){ state.repFilter = r; state.recCity = '全部'; state.recDistrict = '全部'; applyIdentityUI(); render(); }
+
+/* ---------- Scope / filter ---------- */
+function scopeOpps(){
+  if(isManager()){
+    if(state.repFilter==='全部') return state.opps;
+    return state.opps.filter(o=>o.owner===state.repFilter);
+  }
+  return state.opps.filter(o=>o.owner===state.identity);
+}
+function setFilter(f){
+  state.filter = f;
+  document.querySelectorAll('#stageFilter button').forEach(b=>b.classList.toggle('active', b.dataset.f===f));
+  render();
+}
+function getFiltered(){
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  return scopeOpps().filter(o=>{
+    if(state.filter==='進行中' && o.stage==='結案') return false;
+    if(state.filter!=='全部' && state.filter!=='進行中' && o.stage!==state.filter) return false;
+    if(q && !(o.customer.toLowerCase().includes(q) || o.project.toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a,b)=>{
+    const da = a.closeDate ? new Date(a.closeDate) : new Date('2100-01-01');
+    const db = b.closeDate ? new Date(b.closeDate) : new Date('2100-01-01');
+    return da-db;
+  });
+}
+
+/* ---------- Render helpers ---------- */
+function stageBadge(o){
+  if(o.stage==='結案'){
+    const cls = o.dealResult==='won' ? 'won' : o.dealResult==='lost' ? 'lost' : 'pending';
+    const label = o.dealResult==='won' ? '結案・成交' : o.dealResult==='lost' ? '結案・未成交' : '結案・待定';
+    return `<span class="stage-badge stage-結案 ${cls}"><span class="dot"></span>${label}</span>`;
+  }
+  return `<span class="stage-badge stage-${o.stage}"><span class="dot"></span>${o.stage}</span>`;
+}
+function nextFollowInfo(o){
+  const latest = o.visits[o.visits.length-1];
+  if(!latest || !latest.follow) return {label:'—', cls:'none'};
+  const d = daysUntil(latest.follow);
+  if(o.stage==='結案') return {label: latest.follow, cls:'none'};
+  if(d<0) return {label: latest.follow+' (逾期)', cls:'overdue'};
+  if(d<=3) return {label: latest.follow, cls:'soon'};
+  return {label: latest.follow, cls:''};
+}
+
+function repStats(rep){
+  const list = state.opps.filter(o=>o.owner===rep && o.stage!=='結案');
+  const count = list.length;
+  const amt = list.reduce((s,o)=>s+(Number(o.amount)||0),0);
+  const weighted = list.reduce((s,o)=>s+((Number(o.amount)||0)*(Number(o.confidenceLevel)||0)/100),0);
+  const soon = list.filter(o=>{ const d=daysUntil(o.closeDate); return d!==null && d>=0 && d<=30; }).length;
+  return {count, amt, weighted, soon};
+}
+
+function renderRepSummary(){
+  const body = document.getElementById('repSummaryBody');
+  body.innerHTML = REPS.map(r=>{
+    const s = repStats(r);
+    const active = state.repFilter===r ? 'active-row' : '';
+    return `<tr class="${active}" onclick="setRepFilter('${r}')">
+      <td><div class="rep-name-cell"><div class="rep-mini-avatar">${r[0]}</div>${r}</div></td>
+      <td style="text-align:right" class="mono">${s.count}</td>
+      <td style="text-align:right" class="amount">${fmtMoney(s.amt)}</td>
+      <td style="text-align:right" class="amount">${fmtMoney(Math.round(s.weighted))}</td>
+      <td style="text-align:right" class="mono">${s.soon} 筆</td>
+    </tr>`;
+  }).join('');
+}
+
+function render(){
+  applyIdentityUI();
+  if(isManager()) renderRepSummary();
+
+  const list = getFiltered();
+  const tbody = document.getElementById('tableBody');
+  document.getElementById('emptyState').style.display = list.length? 'none':'block';
+  const mgr = isManager();
+  tbody.innerHTML = list.map(o=>{
+    const nf = nextFollowInfo(o);
+    return `<tr onclick="openPanel('${o.id}')">
+      <td><div class="cust-name">${esc(o.customer)}</div><div class="cust-project">${esc(o.project)}</div></td>
+      ${mgr ? `<td><span class="owner-tag">${esc(o.owner)}</span></td>` : ''}
+      <td>${stageBadge(o)}</td>
+      <td style="text-align:right" class="amount">${fmtMoney(o.amount)}</td>
+      <td><span class="rate-num mono">${shortConfidenceLabel(o.confidenceLevel)}</span></td>
+      <td><span class="next-follow ${nf.cls}">${nf.label}</span></td>
+      <td class="mono" style="font-size:12.5px;color:var(--ink-soft)">${o.closeDate||'—'}</td>
+      <td>${o.stage==='結案' ? (o.dealResult==='won'?'✅ 成交':o.dealResult==='lost'?'❌ 未成交':'—') : '進行中'}</td>
+    </tr>`;
+  }).join('');
+
+  // KPIs (scoped, ignoring search/stage filter, matching current owner scope)
+  const scoped = scopeOpps();
+  const active = scoped.filter(o=>o.stage!=='結案');
+  const totalAmt = active.reduce((s,o)=>s+(Number(o.amount)||0),0);
+  // 當季預計認列金額＝所有商機（不限進行中）：提案金額 × 把握度 × 當季認列% 加總
+  const weighted = scoped.reduce((s,o)=>s+predictedAmount(o),0);
+  const followSoon = scoped.filter(o=>{
+    if(o.stage==='結案') return false;
+    const latest = o.visits[o.visits.length-1];
+    if(!latest||!latest.follow) return false;
+    const d = daysUntil(latest.follow);
+    return d<=7;
+  }).length;
+  document.getElementById('kpiActive').textContent = active.length;
+  document.getElementById('kpiAmount').textContent = fmtMoney(totalAmt);
+  document.getElementById('kpiWeighted').textContent = fmtMoney(Math.round(weighted));
+  document.getElementById('kpiFollow').textContent = followSoon;
+
+  if(state.page==='recognition') renderRecognitionPage();
+}
+
+/* ============================================================
+   白名單開發 頁
+   ============================================================ */
+function setWlFilter(label){
+  state.wlFilter = label;
+  document.querySelectorAll('#wlStatusFilter button').forEach(b=>b.classList.toggle('active', b.dataset.f===label));
+  renderWhitelistPage();
+}
+function getWlFiltered(){
+  const q = (document.getElementById('wlSearchBox').value||'').trim().toLowerCase();
+  return getWlScope().filter(w=>{
+    if(state.wlFilter!=='全部' && w.status !== WL_STATUS_BY_LABEL[state.wlFilter]) return false;
+    if(q){
+      const hit = w.companyId.toLowerCase().includes(q) || (w.shortName||'').toLowerCase().includes(q) || w.fullName.toLowerCase().includes(q);
+      if(!hit) return false;
+    }
+    return true;
+  });
+}
+function renderWhitelistPage(){
+  const list = getWlFiltered();
+  const tbody = document.getElementById('wlTableBody');
+  document.getElementById('wlEmptyState').style.display = list.length ? 'none' : 'block';
+  tbody.innerHTML = list.map(w=>{
+    const last = wlLastHistory(w);
+    const nf = wlNextFollowInfo(w);
+    return `<tr onclick="openWlPanel('${w.id}')">
+      <td class="mono">${esc(w.companyId)}</td>
+      <td class="cust-name">${esc(w.shortName||'—')}</td>
+      <td>${esc(w.fullName)}</td>
+      <td>${esc(w.city)}</td>
+      <td>${last ? esc(last.result) : '—'}</td>
+      <td><span class="next-follow ${nf.cls}">${nf.label}</span></td>
+      <td style="text-align:center" class="mono">${w.history.length}</td>
+      <td><span class="wl-status-badge wl-${w.status}">${wlStatusLabel(w.status)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function currentWl(){ return state.whitelist.find(x=>x.id===state.wlActiveId); }
+
+function openWlPanel(id){
+  state.wlActiveId = id;
+  const w = state.whitelist.find(x=>x.id===id);
+  if(!w) return;
+  document.getElementById('wlDCompany').textContent = w.shortName || w.fullName;
+  document.getElementById('wlDSub').textContent = w.fullName;
+  document.getElementById('wlDStatus').textContent = wlStatusLabel(w.status);
+  document.getElementById('wlDCount').textContent = w.history.length;
+  document.getElementById('wlDCompanyId').textContent = w.companyId;
+  document.getElementById('wlDShortName').textContent = w.shortName || '—';
+  document.getElementById('wlDFullName').textContent = w.fullName;
+  document.getElementById('wlDCity').textContent = w.city;
+  document.getElementById('wlDOwner').textContent = w.owner;
+
+  const exBox = document.getElementById('wlExcludeInfoBox');
+  if(w.status==='excluded' && w.excludeInfo){
+    exBox.style.display = 'block';
+    document.getElementById('wlDExcludeReason').textContent = w.excludeInfo.reason;
+    document.getElementById('wlDExcludeTime').textContent = w.excludeInfo.time;
+    document.getElementById('wlDExcludeNote').textContent = w.excludeInfo.note || '—';
+    document.getElementById('wlDExcludeOperator').textContent = w.excludeInfo.operator;
+  } else { exBox.style.display = 'none'; }
+
+  const linkBox = document.getElementById('wlLinkedBox');
+  if(w.linkedOppId){
+    linkBox.style.display = 'block';
+    const linkedOpp = state.opps.find(o=>o.id===w.linkedOppId);
+    document.getElementById('wlDLinkedOpp').textContent = linkedOpp ? (linkedOpp.customer + '（已建立 CRM 商機）') : '（找不到對應商機，可能已被刪除）';
+  } else { linkBox.style.display = 'none'; }
+
+  renderWlTimeline(w);
+  document.getElementById('wlAddForm').classList.remove('show');
+  document.getElementById('wlAddBox').classList.remove('editing');
+  document.getElementById('wlAddPlus').textContent = '＋';
+  document.getElementById('wlHDate').value = todayStr();
+  document.getElementById('wlHResult').value = '未接';
+  document.getElementById('wlHNote').value = '';
+  document.getElementById('wlHFollow').value = '';
+
+  const mgr = isManager();
+  const canAddHistory = !mgr && (w.status!=='converted' && w.status!=='excluded');
+  document.getElementById('wlAddBox').style.display = canAddHistory ? 'block' : 'none';
+  const canAct = !mgr && (w.status==='pending' || w.status==='unreachable');
+  document.getElementById('wlPanelFooter').style.display = canAct ? 'flex' : 'none';
+  document.getElementById('wlConvertBtn').style.display = (!mgr && w.status==='pending') ? 'inline-block' : 'none';
+
+  document.getElementById('wlPanel').classList.add('show');
+  document.getElementById('wlScrim').classList.add('show');
+}
+function closeWlPanel(){
+  document.getElementById('wlPanel').classList.remove('show');
+  document.getElementById('wlScrim').classList.remove('show');
+  state.wlActiveId = null;
+}
+function renderWlTimeline(w){
+  const tl = document.getElementById('wlTimeline');
+  if(!w.history.length){ tl.innerHTML = '<div style="color:var(--ink-faint); font-size:13px; padding:8px 0;">尚無開發紀錄</div>'; return; }
+  tl.innerHTML = w.history.slice().reverse().map(h=>`
+    <div class="tl-item">
+      <div class="tl-node"></div>
+      <div class="tl-card">
+        <div class="tl-top"><span class="tl-date mono">${h.date}</span><span class="tl-type-tag wl-tag-${h.result}">${esc(h.result)}</span></div>
+        <div class="tl-content">${esc(h.note)||'（無紀錄內容）'}</div>
+        <div class="tl-next">下次追蹤：<b>${h.follow||'—'}</b></div>
+      </div>
+    </div>`).join('');
+}
+function toggleWlAddForm(){
+  const f = document.getElementById('wlAddForm');
+  const box = document.getElementById('wlAddBox');
+  f.classList.toggle('show'); box.classList.toggle('editing');
+  document.getElementById('wlAddPlus').textContent = f.classList.contains('show') ? '−' : '＋';
+}
+async function addWlHistory(){
+  const w = currentWl(); if(!w || isManager()) return;
+  if(w.status==='converted' || w.status==='excluded') return; // 防呆：已轉拜訪／已排除不可再新增開發紀錄
+  const date = document.getElementById('wlHDate').value;
+  const result = document.getElementById('wlHResult').value;
+  const note = document.getElementById('wlHNote').value.trim();
+  const follow = document.getElementById('wlHFollow').value;
+  if(!date){ alert('請選擇開發日期'); return; }
+
+  // 直接 INSERT whitelist_histories：RLS 已限定只能新增自己名下白名單公司的紀錄，
+  // 五次不同日期未接的自動狀態切換由資料庫 trigger 處理，不是靠這裡的前端判斷。
+  const { error } = await sb.from('whitelist_histories').insert({
+    whitelist_company_id: w.id, contact_date: date, result, note: note || null,
+    next_follow_date: follow || null, created_by: state.teamMemberId
+  });
+  if(error){ alert('儲存開發紀錄失敗：' + error.message); return; }
+
+  const before = w.status;
+  const fresh = await refreshOneWhitelist(w.id);
+  toggleWlAddForm();
+  openWlPanel(w.id);
+  renderWhitelistPage();
+  if(fresh && before==='pending' && fresh.status==='unreachable'){
+    alert(`「${fresh.shortName||fresh.fullName}」已累積 5 個不同日期的未接紀錄，系統已自動將狀態改為「無法聯繫」，並從待開發清單移出。`);
+  }
+}
+
+/* ---------- 排除 ---------- */
+function openExcludeModal(){
+  const w = currentWl(); if(!w) return;
+  document.getElementById('wlExcludeCompanyLabel').textContent = `將排除「${w.shortName||w.fullName}」（${w.companyId}）`;
+  document.getElementById('wlExcludeReason').value = '重複公司';
+  document.getElementById('wlExcludeNote').value = '';
+  document.getElementById('wlExcludeNoteBox').style.display = 'none';
+  document.getElementById('wlExcludeScrim').classList.add('show');
+}
+function onExcludeReasonChange(){
+  const r = document.getElementById('wlExcludeReason').value;
+  document.getElementById('wlExcludeNoteBox').style.display = (r==='其他') ? 'block' : 'none';
+}
+function closeExcludeModal(){ document.getElementById('wlExcludeScrim').classList.remove('show'); }
+async function confirmExclude(){
+  const w = currentWl(); if(!w || isManager()) return;
+  const reason = document.getElementById('wlExcludeReason').value;
+  const note = document.getElementById('wlExcludeNote').value.trim();
+  if(reason==='其他' && !note){ alert('選擇「其他」時，補充說明必填'); return; }
+
+  const { error } = await sb.rpc('rpc_exclude_whitelist_company', {
+    p_whitelist_company_id: w.id, p_reason: reason, p_note: note || null
+  });
+  if(error){ alert('排除失敗：' + error.message); return; }
+
+  await refreshOneWhitelist(w.id);
+  closeExcludeModal();
+  closeWlPanel();
+  renderWhitelistPage();
+}
+
+/* ---------- 轉為拜訪：直接沿用既有「＋新增拜訪」Modal ---------- */
+function convertToVisit(){
+  const w = currentWl(); if(!w || isManager() || w.status!=='pending') return;
+  closeWlPanel();
+  openNewModal(w.id);
+}
+
+/* ---------- Detail panel ---------- */
+/* ============================================================
+   商機／業績認列 頁
+   ============================================================ */
+function switchPage(page){
+  if(page==='whitelist' && !canSeeWhitelist()) return;
+  if(page==='deleteReview' && !isManager()) return;
+  state.page = page;
+  document.getElementById('navCrm').classList.toggle('active', page==='crm');
+  document.getElementById('navRecognition').classList.toggle('active', page==='recognition');
+  document.getElementById('navWhitelist').classList.toggle('active', page==='whitelist');
+  document.getElementById('navDeleteReview').classList.toggle('active', page==='deleteReview');
+  document.getElementById('pageCrm').style.display = page==='crm' ? 'block' : 'none';
+  document.getElementById('pageRecognition').style.display = page==='recognition' ? 'block' : 'none';
+  document.getElementById('pageWhitelist').style.display = page==='whitelist' ? 'block' : 'none';
+  document.getElementById('pageDeleteReview').style.display = page==='deleteReview' ? 'block' : 'none';
+  if(page==='recognition') renderRecognitionPage();
+  if(page==='whitelist') renderWhitelistPage();
+  if(page==='deleteReview') renderDeleteReviewPage();
+}
+
+function predictedAmount(o){
+  const amt = Number(o.amount)||0;
+  const conf = Number(o.confidenceLevel)||0;
+  const rec = Number(o.recognitionRate)||0;
+  return amt * (conf/100) * (rec/100);
+}
+
+function cityDistrictStats(list){
+  // 依 city -> {amt,count, districts:{district:{amt,count}}} 彙總，全部由目前資料即時計算，不寫死
+  const stats = {};
+  list.forEach(o=>{
+    const c = o.city || '待補資料';
+    if(!stats[c]) stats[c] = { amt:0, count:0, districts:{} };
+    stats[c].amt += Number(o.amount)||0;
+    stats[c].count += 1;
+    const d = o.district || '待補資料';
+    if(!stats[c].districts[d]) stats[c].districts[d] = { amt:0, count:0 };
+    stats[c].districts[d].amt += Number(o.amount)||0;
+    stats[c].districts[d].count += 1;
+  });
+  return stats;
+}
+
+function renderRecognitionPage(){
+  const mgr = isManager();
+  document.getElementById('recScopeLabel').textContent = mgr ? (state.repFilter==='全部' ? '全組' : state.repFilter) : state.identity;
+
+  const baseScope = scopeOpps(); // 沿用與 CRM 頁相同的業務／主管權限範圍
+  const stats = cityDistrictStats(baseScope);
+  const cityNames = Object.keys(stats).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+
+  // 縣市篩選列
+  const totalAmt = baseScope.reduce((s,o)=>s+(Number(o.amount)||0),0);
+  let cityChipsHtml = `<div class="rec-chip ${state.recCity==='全部'?'active':''}" onclick="setRecCity('全部')">全部 <span class="n">${fmtMoney(totalAmt)}</span><span class="c">(${baseScope.length})</span></div>`;
+  cityChipsHtml += cityNames.map(c=>{
+    const s = stats[c];
+    return `<div class="rec-chip ${state.recCity===c?'active':''}" onclick="setRecCity('${c}')">${c} <span class="n">${fmtMoney(s.amt)}</span><span class="c">(${s.count})</span></div>`;
+  }).join('');
+  document.getElementById('cityChips').innerHTML = cityChipsHtml;
+
+  // 地區篩選列（只在選定特定縣市時顯示）
+  let scopeAfterCity = baseScope;
+  const districtRow = document.getElementById('districtFilterRow');
+  if(state.recCity !== '全部'){
+    districtRow.style.display = 'flex';
+    scopeAfterCity = baseScope.filter(o=>o.city===state.recCity);
+    const dStats = stats[state.recCity] ? stats[state.recCity].districts : {};
+    const dNames = Object.keys(dStats).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+    const cAmt = stats[state.recCity] ? stats[state.recCity].amt : 0;
+    const cCount = stats[state.recCity] ? stats[state.recCity].count : 0;
+    let dHtml = `<div class="rec-chip ${state.recDistrict==='全部'?'active':''}" onclick="setRecDistrict('全部')">全部 <span class="n">${fmtMoney(cAmt)}</span><span class="c">(${cCount})</span></div>`;
+    dHtml += dNames.map(d=>{
+      const s = dStats[d];
+      return `<div class="rec-chip ${state.recDistrict===d?'active':''}" onclick="setRecDistrict('${d}')">${d} <span class="n">${fmtMoney(s.amt)}</span><span class="c">(${s.count})</span></div>`;
+    }).join('');
+    document.getElementById('districtChips').innerHTML = dHtml;
+  } else {
+    districtRow.style.display = 'none';
+    state.recDistrict = '全部';
+  }
+
+  let finalScope = scopeAfterCity;
+  if(state.recCity !== '全部' && state.recDistrict !== '全部'){
+    finalScope = scopeAfterCity.filter(o=>o.district===state.recDistrict);
+  }
+
+  document.getElementById('recEmpty').style.display = finalScope.length ? 'none' : 'block';
+  document.getElementById('recTableCard').style.display = finalScope.length ? 'block' : 'none';
+
+  // 分組：選定單一縣市時依「行政區」分組；選「全部」時依「縣市・行政區」分組，避免跨縣市同名行政區混在一起
+  const groupKeyFn = state.recCity==='全部' ? (o)=> (o.city||'待補資料') + ' ・ ' + (o.district||'待補資料') : (o)=> (o.district||'待補資料');
+  const groups = {};
+  finalScope.forEach(o=>{
+    const k = groupKeyFn(o);
+    if(!groups[k]) groups[k] = [];
+    groups[k].push(o);
+  });
+  recGroupMap = {};
+  Object.keys(groups).forEach(k=>{ recGroupMap[k] = groups[k].map(o=>o.id); });
+
+  const groupKeys = Object.keys(groups).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+  const card = document.getElementById('recTableCard');
+  card.innerHTML = groupKeys.map(k=>renderRecGroup(k, groups[k], true)).join(''); // 本頁一律唯讀，不分業務／主管
+}
+
+function setRecCity(c){ state.recCity = c; state.recDistrict = '全部'; renderRecognitionPage(); }
+function setRecDistrict(d){ state.recDistrict = d; renderRecognitionPage(); }
+
+function renderRecGroup(groupKey, opps, mgr){
+  const sortedOpps = opps.slice().sort((a,b)=> (a.createdDate||'').localeCompare(b.createdDate||''));
+  const rows = sortedOpps.map((o,idx)=>renderRecRow(o, idx===0, sortedOpps.length, groupKey, mgr)).join('');
+  const sumAmt = opps.reduce((s,o)=>s+(Number(o.amount)||0),0);
+  const sumPred = opps.reduce((s,o)=>s+predictedAmount(o),0);
+  return `
+    <div class="rec-group" id="group-${cssId(groupKey)}">
+      <div class="rec-group-head" onclick="toggleGroupCollapse('${cssId(groupKey)}')">
+        <span class="collapse-tag">收回</span> ${esc(groupKey)}
+      </div>
+      <div class="rec-group-body">
+        <table class="rec-table">
+          <thead>
+            <tr>
+              <th style="width:9%">行政區</th>
+              <th style="width:11%">商機 ID</th>
+              <th style="width:14%">客戶名稱</th>
+              <th style="width:11%">商機起始日</th>
+              <th style="width:10%; text-align:right">提案金額</th>
+              <th style="width:14%">把握度</th>
+              <th style="width:14%">當季業績預計認列 %</th>
+              <th style="width:12%; text-align:right">預計當季認列金額</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+            <tr class="rec-subtotal-row" id="subtotal-${cssId(groupKey)}">
+              <td colspan="4">小計（${opps.length} 件）</td>
+              <td style="text-align:right" id="subtotal-amt-${cssId(groupKey)}">${fmtMoney(sumAmt)}</td>
+              <td colspan="2"></td>
+              <td style="text-align:right" id="subtotal-pred-${cssId(groupKey)}">${fmtMoney(Math.round(sumPred))}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderRecRow(o, isFirst, groupSize, groupKey, mgr){
+  const pred = predictedAmount(o);
+  const confOptions = CONFIDENCE_LEVELS.map(c=>`<option value="${c.value}" ${Number(o.confidenceLevel)===c.value?'selected':''}>${c.label}(${c.value}%)</option>`).join('');
+  const confCell = mgr
+    ? `<div class="rec-editable-wrap ro"><span class="rec-readonly">${confidenceLabel(o.confidenceLevel)}</span></div>`
+    : `<div class="rec-editable-wrap"><select onchange="updateConfidence('${o.id}', this.value)">${confOptions}</select></div>`;
+  const recCell = mgr
+    ? `<div class="rec-editable-wrap ro"><span class="rec-readonly">${o.recognitionRate||0}%</span></div>`
+    : `<div class="rec-editable-wrap"><input type="number" min="0" max="100" value="${o.recognitionRate||0}" oninput="updateRecognition('${o.id}', this.value)"></div>`;
+  return `<tr data-opp-id="${o.id}" data-group="${esc(groupKey)}">
+    ${isFirst ? `<td class="rec-district-cell" rowspan="${groupSize}">${esc(o.district||'—')}</td>` : ''}
+    <td class="rec-id rec-readonly">${o.opportunityId ? esc(o.opportunityId) : '—'}</td>
+    <td class="rec-cust">${esc(o.customer)}</td>
+    <td class="rec-readonly">${o.createdDate||'—'}</td>
+    <td style="text-align:right" class="rec-amount rec-readonly">${fmtMoney(o.amount)}</td>
+    <td>${confCell}</td>
+    <td>${recCell}</td>
+    <td style="text-align:right" class="rec-pred" id="pred-${o.id}">${fmtMoney(Math.round(pred))}</td>
+  </tr>`;
+}
+
+function cssId(k){ return k.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g,'_'); }
+
+function toggleGroupCollapse(safeKey){
+  const el = document.getElementById('group-'+safeKey);
+  if(el) el.classList.toggle('collapsed');
+}
+
+// 商機／預計認列頁目前一律唯讀（業務也不可在此修改），以下兩個函式保留但已無 UI 呼叫進入點；
+// 把握度／當季認列 % 一律透過 CRM 商機詳細頁「新增拜訪紀錄」（rpc_add_visit）修改
+function updateConfidence(oppId, value){
+  if(isManager()) return;
+  const o = state.opps.find(x=>x.id===oppId); if(!o) return;
+  o.confidenceLevel = Number(value);
+  updateRowCalc(oppId);
+}
+function updateRecognition(oppId, value){
+  if(isManager()) return;
+  const o = state.opps.find(x=>x.id===oppId); if(!o) return;
+  let v = Number(value);
+  if(isNaN(v)) v = 0;
+  v = Math.max(0, Math.min(100, v));
+  o.recognitionRate = v;
+  updateRowCalc(oppId);
+}
+function updateRowCalc(oppId){
+  const o = state.opps.find(x=>x.id===oppId); if(!o) return;
+  const pred = predictedAmount(o);
+  const predCell = document.getElementById('pred-'+oppId);
+  if(predCell) predCell.textContent = fmtMoney(Math.round(pred));
+  // 找出此商機所屬分組，重新計算該組小計（不重繪整張表，避免輸入焦點跳掉）
+  const groupKey = Object.keys(recGroupMap).find(k=>recGroupMap[k].includes(oppId));
+  if(!groupKey) return;
+  const groupOpps = recGroupMap[groupKey].map(id=>state.opps.find(x=>x.id===id)).filter(Boolean);
+  const sumPred = groupOpps.reduce((s,x)=>s+predictedAmount(x),0);
+  const subtotalCell = document.getElementById('subtotal-pred-'+cssId(groupKey));
+  if(subtotalCell) subtotalCell.textContent = fmtMoney(Math.round(sumPred));
+}
+
+function currentOpp(){ return state.opps.find(x=>x.id===state.activeId); }
+
+function openPanel(id){
+  state.activeId = id;
+  const o = state.opps.find(x=>x.id===id);
+  if(!o) return;
+  state.draft = JSON.parse(JSON.stringify(o)); // 詳細頁一律先編輯草稿，按「儲存」才寫回正式資料
+  const d = state.draft;
+  const ro = isManager();
+  document.getElementById('panelBody').classList.toggle('ro', ro);
+
+  document.getElementById('fCustomer').value = d.customer;
+  document.getElementById('fCity').innerHTML = buildCitySelectOptions(d.city);
+  document.getElementById('fDistrict').innerHTML = buildDistrictSelectOptions(d.city, d.district);
+
+  document.getElementById('dCreatedDate').textContent = d.createdDate || '—';
+  document.getElementById('dOppId').textContent = d.opportunityId ? d.opportunityId : '—';
+  document.getElementById('dSourceType').textContent = d.sourceType==='whitelist' ? '白名單' : '自行開發';
+  const wlInfoBox = document.getElementById('dWhitelistInfoBox');
+  if(d.sourceType==='whitelist' && d.whitelistSnapshot){
+    wlInfoBox.style.display = 'grid';
+    document.getElementById('dWlCompanyId').textContent = d.whitelistSnapshot.companyId || '—';
+    document.getElementById('dWlShortName').textContent = d.whitelistSnapshot.shortName || '—';
+    document.getElementById('dWlFullName').textContent = d.whitelistSnapshot.fullName || '—';
+    document.getElementById('dWlCity').textContent = d.whitelistSnapshot.city || '—';
+  } else {
+    wlInfoBox.style.display = 'none';
+  }
+  renderProposalSummary(d); // B 區唯讀摘要＋面板標題，一律讀最新一次提案的主資料
+
+  ['fCustomer','fCity','fDistrict'].forEach(fid=>{
+    document.getElementById(fid).disabled = ro;
+  });
+
+  document.getElementById('ownerDisplay').textContent = o.owner;
+  // V1 不提供 CRM 轉交業務功能，這個控制項固定隱藏
+  document.getElementById('transferBox').style.display = 'none';
+
+  renderTimeline(d);
+  document.getElementById('addVisitForm').classList.remove('show');
+  document.getElementById('addVisitBox').style.display = ro ? 'none' : 'block';
+  document.getElementById('panelFooter').style.display = ro ? 'none' : 'flex';
+  document.getElementById('vDate').value = todayStr();
+  document.getElementById('vType').value = '初訪';
+  document.getElementById('vResultField').style.display = 'none';
+  document.getElementById('vResult').value = '';
+  document.getElementById('vProposalFields').style.display = 'none';
+  document.getElementById('vProject').value = '';
+  document.getElementById('vAmount').value = '';
+  document.getElementById('vRecognition').value = '';
+  document.getElementById('vCloseDate').value = '';
+  document.getElementById('vFollow').value = '';
+  document.getElementById('vContent').value = '';
+  document.getElementById('vNext').value = '';
+
+  document.getElementById('panel').classList.add('show');
+  document.getElementById('scrim').classList.add('show');
+}
+function buildCitySelectOptions(selectedCity){
+  let html = `<option value="" ${!selectedCity?'selected':''}>請選擇縣市</option>`;
+  html += Object.keys(TAIWAN_REGIONS).map(c=>`<option value="${c}" ${c===selectedCity?'selected':''}>${c}</option>`).join('');
+  return html;
+}
+function buildDistrictSelectOptions(city, selectedDistrict){
+  if(!city || !TAIWAN_REGIONS[city]){
+    return `<option value="" selected>請先選擇縣市</option>`;
+  }
+  let html = `<option value="" ${!selectedDistrict?'selected':''}>請選擇行政區</option>`;
+  html += TAIWAN_REGIONS[city].map(d=>`<option value="${d}" ${d===selectedDistrict?'selected':''}>${d}</option>`).join('');
+  return html;
+}
+function onCityChange(){
+  const d = state.draft; if(!d || isManager()) return;
+  const newCity = document.getElementById('fCity').value;
+  document.getElementById('fDistrict').innerHTML = buildDistrictSelectOptions(newCity, '');
+  draftField();
+}
+function updatePanelPredicted(o){
+  const el = document.getElementById('dPredicted');
+  if(el) el.textContent = fmtMoney(Math.round(predictedAmount(o)));
+}
+function closePanel(){
+  // 沒按最下方「儲存」就關閉／點背景／按 Esc，草稿直接丟棄，不寫回正式資料
+  document.getElementById('panel').classList.remove('show');
+  document.getElementById('scrim').classList.remove('show');
+  state.activeId = null;
+  state.draft = null;
+}
+
+function renderTimeline(o){
+  const tl = document.getElementById('timeline');
+  if(!o.visits.length){ tl.innerHTML = '<div style="color:var(--ink-faint); font-size:13px; padding:8px 0 8px 0;">尚無拜訪紀錄</div>'; return; }
+  tl.innerHTML = o.visits.slice().reverse().map(v=>{
+    if(v.system){
+      return `<div class="tl-item" data-type="${v.type||'初訪'}"><div class="tl-node" style="border-color:var(--ink-navy)"></div><div class="tl-sys">${esc(v.content)}</div></div>`;
+    }
+    const proposalBlock = (v.type==='提案') ? `
+        <div class="tl-proposal">
+          <div class="tl-proposal-row"><span>提案內容</span><b>${esc(v.project)||'—'}</b></div>
+          <div class="tl-proposal-row"><span>提案金額</span><b class="mono">${fmtMoney(v.amount)}</b></div>
+          <div class="tl-proposal-row"><span>把握度</span><b>${confidenceLabel(v.confidenceLevel)}</b></div>
+          <div class="tl-proposal-row"><span>當季認列 %</span><b class="mono">${v.recognitionRate||0}%</b></div>
+          <div class="tl-proposal-row"><span>預計簽約日期</span><b>${v.closeDate||'—'}</b></div>
+        </div>` : '';
+    return `<div class="tl-item" data-type="${v.type}">
+      <div class="tl-node"></div>
+      <div class="tl-card">
+        <div class="tl-top"><span class="tl-date mono">${v.date}</span><span class="tl-type-tag stage-${v.type}">${v.type}</span></div>
+        <div class="tl-content">${esc(v.content)||'（無紀錄內容）'}</div>
+        ${proposalBlock}
+        <div class="tl-next">下一步：<b>${esc(v.next)||'—'}</b>　｜　下次追蹤：<b>${v.follow||'—'}</b></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderProposalSummary(d){
+  // B 區唯讀摘要：只顯示「最新一次提案拜訪」寫入的主資料
+  document.getElementById('dProjectText').textContent = d.project || '（尚未提出提案）';
+  document.getElementById('dAmountText').textContent = fmtMoney(d.amount);
+  document.getElementById('dConfidenceText').textContent = confidenceLabel(d.confidenceLevel);
+  document.getElementById('dRecognitionText').textContent = (d.recognitionRate||0) + '%';
+  document.getElementById('dCloseDateText').textContent = d.closeDate || '—';
+  document.getElementById('dProject').textContent = d.project || '（尚未填寫提案內容）';
+  updatePanelPredicted(d);
+}
+
+function draftField(){
+  const d = state.draft; if(!d || isManager()) return;
+  d.customer = document.getElementById('fCustomer').value || '未命名客戶';
+  d.city = document.getElementById('fCity').value;
+  d.district = document.getElementById('fDistrict').value;
+  // 只更新面板內自己的顯示（客戶標題），不寫回 CRM 清單／KPI／商機頁／localStorage
+  document.getElementById('dCustomer').textContent = d.customer;
+}
+function toggleAddForm(){
+  const f = document.getElementById('addVisitForm');
+  const box = document.getElementById('addVisitBox');
+  f.classList.toggle('show'); box.classList.toggle('editing');
+  document.getElementById('addPlus').textContent = f.classList.contains('show') ? '−' : '＋';
+}
+function onVisitTypeChange(){
+  const type = document.getElementById('vType').value;
+  document.getElementById('vResultField').style.display = (type==='結案') ? 'block' : 'none';
+  const propBox = document.getElementById('vProposalFields');
+  if(type==='提案'){
+    propBox.style.display = 'grid';
+    // 帶入目前草稿最新的提案資料，方便業務只調整其中一項後再存
+    const d = state.draft;
+    if(d){
+      document.getElementById('vProject').value = d.project || '';
+      document.getElementById('vAmount').value = d.amount || '';
+      document.getElementById('vConfidence').innerHTML = CONFIDENCE_LEVELS.map(c=>
+        `<option value="${c.value}" ${Number(d.confidenceLevel)===c.value?'selected':''}>${c.label}（${c.value}%）</option>`
+      ).join('');
+      document.getElementById('vRecognition').value = d.recognitionRate || 0;
+      document.getElementById('vCloseDate').value = d.closeDate || '';
+    }
+  } else {
+    propBox.style.display = 'none';
+  }
+}
+async function addVisit(){
+  const d = state.draft; if(!d || isManager()) return;
+  const date = document.getElementById('vDate').value || todayStr();
+  const type = document.getElementById('vType').value;
+  const content = document.getElementById('vContent').value.trim();
+  const next = document.getElementById('vNext').value.trim();
+  const follow = document.getElementById('vFollow').value;
+  if(!content){ alert('請先填寫本次紀錄內容'); return; }
+
+  let result = null;
+  if(type==='結案'){
+    result = document.getElementById('vResult').value;
+    if(!result){ alert('拜訪重點選了「結案」，請選擇結案結果（成交／未成交）'); return; }
+  }
+
+  let proposal = null;
+  if(type==='提案'){
+    const vProject = document.getElementById('vProject').value.trim();
+    const vAmount = document.getElementById('vAmount').value;
+    const vConfidence = Number(document.getElementById('vConfidence').value)||0;
+    let vRecognition = Number(document.getElementById('vRecognition').value);
+    if(isNaN(vRecognition)) vRecognition = 0;
+    vRecognition = Math.max(0, Math.min(100, vRecognition));
+    const vCloseDate = document.getElementById('vCloseDate').value;
+    const amountOk = vAmount !== '' && Number(vAmount) > 0;
+    const confidenceOk = vConfidence > 0;
+    // 拜訪重點選「提案」時，5 欄缺一不可，不可儲存（後端 rpc_add_visit 也會再檢查一次）
+    if(!vProject || !amountOk || !confidenceOk || !vCloseDate){
+      alert('拜訪重點選「提案」時，提案內容、提案金額、把握度、當季業績預計認列 %、預計簽約日期都必須填寫才能儲存');
+      return;
+    }
+    proposal = { project:vProject, amount:Number(vAmount), confidenceLevel:vConfidence, recognitionRate:vRecognition, closeDate:vCloseDate };
+  }
+
+  // 新增拜訪紀錄透過 RPC 立即正式寫入（visits 表與 opportunities 的階段/提案主資料同一個
+  // 交易一起更新），不像本機原型那樣要等外層「儲存」才生效——這樣每一筆拜訪／提案都是
+  // 有交易保障的獨立動作，跟白名單轉換、刪除審核用同一套一致性原則。
+  const { error } = await sb.rpc('rpc_add_visit', {
+    p_opportunity_id: d.id,
+    p_visit_date: date,
+    p_visit_type: type,
+    p_content: content,
+    p_next_action: next || null,
+    p_next_follow_date: follow || null,
+    p_project: proposal ? proposal.project : null,
+    p_amount: proposal ? proposal.amount : null,
+    p_confidence_level: proposal ? proposal.confidenceLevel : null,
+    p_recognition_rate: proposal ? proposal.recognitionRate : null,
+    p_close_date: proposal ? proposal.closeDate : null,
+    p_deal_result: result
+  });
+  if(error){ alert('儲存拜訪紀錄失敗：' + error.message); return; }
+
+  const fresh = await refreshOneOpportunity(d.id);
+  if(fresh) state.draft = JSON.parse(JSON.stringify(fresh)); // 草稿同步成最新已存入的資料
+  toggleAddForm();
+  renderTimeline(state.draft);
+  renderProposalSummary(state.draft);
+  render(); // 立即同步 CRM 清單、KPI、商機頁
+  document.getElementById('vDate').value = todayStr();
+  document.getElementById('vType').value = '初訪';
+  document.getElementById('vResultField').style.display = 'none';
+  document.getElementById('vResult').value = '';
+  document.getElementById('vProposalFields').style.display = 'none';
+  document.getElementById('vProject').value = '';
+  document.getElementById('vAmount').value = '';
+  document.getElementById('vRecognition').value = '';
+  document.getElementById('vCloseDate').value = '';
+  document.getElementById('vFollow').value = '';
+  document.getElementById('vContent').value = '';
+  document.getElementById('vNext').value = '';
+}
+async function saveOpp(){
+  const d = state.draft; if(!d || isManager()) return;
+  // Block A（客戶名稱／縣市／行政區）是唯一還維持「先編輯、按儲存才生效」的欄位；
+  // 提案內容／金額／把握度／認列%／簽約日期已經在 rpc_add_visit 當下就正式寫入，
+  // 這裡不重複處理，也刻意不允許改（guard trigger 會擋掉），維持單一事實來源。
+  const { error } = await sb.from('opportunities')
+    .update({ customer_name: d.customer, city: d.city, district: d.district })
+    .eq('id', d.id);
+  if(error){ alert('儲存失敗：' + error.message); return; }
+  await refreshOneOpportunity(d.id);
+  closePanel();
+  render();
+}
+async function deleteOpp(){
+  // 正式版不允許業務直接刪除，一律走「申請刪除」＋主管審核，這個函式保留給不小心
+  // 殘留的呼叫點用，實際 UI 已經改成 openDeleteReqModal()。
+  openDeleteReqModal();
+}
+function openDeleteReqModal(){
+  const o = currentOpp(); if(!o || isManager()) return;
+  const pending = state.deleteRequests.find(r=>r.opportunityId===o.id && r.status==='pending');
+  if(pending){ alert('這筆商機已經有一筆待審核的刪除申請，請等主管審核完成。'); return; }
+  document.getElementById('deleteReqSub').textContent = `將為「${o.customer}｜${o.project||'（尚未填寫提案內容）'}」提出刪除申請` +
+    (o.sourceType==='whitelist' ? '（來自白名單：核准後白名單會恢復為待開發，開發歷程保留）' : '');
+  document.getElementById('deleteReqReason').value = '';
+  document.getElementById('deleteReqScrim').classList.add('show');
+}
+function closeDeleteReqModal(){ document.getElementById('deleteReqScrim').classList.remove('show'); }
+async function submitDeleteRequest(){
+  const o = currentOpp(); if(!o || isManager()) return;
+  const reason = document.getElementById('deleteReqReason').value.trim();
+  if(!reason){ alert('請填寫刪除原因'); return; }
+  const { error } = await sb.rpc('rpc_request_delete', { p_opportunity_id: o.id, p_reason: reason });
+  if(error){ alert('送出刪除申請失敗：' + error.message); return; }
+  await loadDeleteRequests();
+  closeDeleteReqModal();
+  closePanel();
+  alert('刪除申請已送出，待主管審核。審核前商機會繼續正常存在。');
+  render();
+}
+function transferOpp(){
+  // V1 不提供 CRM 轉交業務功能（規格明確排除）；控制項在畫面上維持隱藏，
+  // 這裡留一個安全的空函式，避免殘留的 onchange 綁定意外報錯。
+  alert('這個版本尚未提供商機轉交功能。');
+}
+/* ---------- New opportunity modal ---------- */
+let newOppWl = null; // 目前「新增拜訪」modal 選定的白名單公司（sourceType='whitelist' 時使用）
+
+function openNewModal(prefillWlId){
+  if(isManager()) return;
+  document.getElementById('newOppOwnerLabel').textContent = state.identity;
+  document.getElementById('nCustomer').value=''; document.getElementById('nCustomer').disabled=false;
+  document.getElementById('nSourceTypeBox').style.display = canSeeWhitelist() ? 'block' : 'none';
+  document.getElementById('nSourceType').value = 'self';
+  document.getElementById('nWhitelistBox').style.display = 'none';
+  document.getElementById('nWlSearch').style.display = 'block';
+  document.getElementById('nWlSearch').value = '';
+  document.getElementById('nWlPickerResults').innerHTML = '';
+  document.getElementById('nWlPickerSelected').style.display = 'none';
+  newOppWl = null;
+  document.getElementById('nCity').disabled = false;
+  document.getElementById('nCity').innerHTML = buildCitySelectOptions('');
+  document.getElementById('nDistrict').innerHTML = buildDistrictSelectOptions('', '');
+  document.getElementById('nDate').value = todayStr();
+  document.getElementById('nNote').value='';
+
+  if(prefillWlId && canSeeWhitelist()){
+    const w = state.whitelist.find(x=>x.id===prefillWlId);
+    if(w && w.status==='pending'){
+      document.getElementById('nSourceType').value = 'whitelist';
+      document.getElementById('nWhitelistBox').style.display = 'block';
+      pickWlForNewOpp(w.id);
+    }
+  }
+  document.getElementById('modalScrim').classList.add('show');
+}
+function onNewCityChange(){
+  const city = document.getElementById('nCity').value;
+  document.getElementById('nDistrict').innerHTML = buildDistrictSelectOptions(city, '');
+}
+function onSourceTypeChange(){
+  const src = document.getElementById('nSourceType').value;
+  document.getElementById('nWhitelistBox').style.display = (src==='whitelist') ? 'block' : 'none';
+  if(src==='self'){
+    newOppWl = null;
+    document.getElementById('nCustomer').disabled = false;
+    document.getElementById('nCustomer').value = '';
+    document.getElementById('nCity').disabled = false;
+    document.getElementById('nCity').innerHTML = buildCitySelectOptions('');
+    document.getElementById('nDistrict').innerHTML = buildDistrictSelectOptions('', '');
+  } else {
+    document.getElementById('nWlSearch').value = '';
+    renderWlPicker();
+  }
+}
+function renderWlPicker(){
+  const q = document.getElementById('nWlSearch').value.trim().toLowerCase();
+  const candidates = state.whitelist.filter(w=> w.owner===state.identity && w.status==='pending' &&
+    (!q || w.companyId.toLowerCase().includes(q) || (w.shortName||'').toLowerCase().includes(q) || w.fullName.toLowerCase().includes(q))
+  ).slice(0,20);
+  document.getElementById('nWlPickerResults').innerHTML = candidates.map(w=>`
+    <div class="wl-picker-item" onclick="pickWlForNewOpp('${w.id}')">
+      <div><b>${esc(w.shortName||w.fullName)}</b> <span class="id">${esc(w.companyId)}</span></div>
+      <div style="color:var(--ink-faint);">${esc(w.fullName)}・${esc(w.city)}</div>
+    </div>`).join('') || '<div style="padding:10px; color:var(--ink-faint); font-size:12.5px;">沒有符合的待開發白名單公司</div>';
+}
+function pickWlForNewOpp(id){
+  const w = state.whitelist.find(x=>x.id===id); if(!w) return;
+  newOppWl = w;
+  document.getElementById('nCustomer').value = w.shortName || w.fullName;
+  document.getElementById('nCustomer').disabled = true;
+  document.getElementById('nCity').innerHTML = buildCitySelectOptions(w.city);
+  document.getElementById('nCity').disabled = true;
+  document.getElementById('nDistrict').innerHTML = buildDistrictSelectOptions(w.city, '');
+  document.getElementById('nWlPickerResults').innerHTML = '';
+  document.getElementById('nWlSearch').style.display = 'none';
+  const sel = document.getElementById('nWlPickerSelected');
+  sel.style.display = 'flex';
+  sel.innerHTML = `<span>已選擇：<b>${esc(w.shortName||w.fullName)}</b>（${esc(w.companyId)}）</span><a onclick="clearWlPick()">重新選擇</a>`;
+}
+function clearWlPick(){
+  newOppWl = null;
+  document.getElementById('nCustomer').disabled = false;
+  document.getElementById('nCustomer').value = '';
+  document.getElementById('nCity').disabled = false;
+  document.getElementById('nCity').innerHTML = buildCitySelectOptions('');
+  document.getElementById('nDistrict').innerHTML = buildDistrictSelectOptions('', '');
+  document.getElementById('nWlSearch').style.display = 'block';
+  document.getElementById('nWlSearch').value = '';
+  document.getElementById('nWlPickerSelected').style.display = 'none';
+  renderWlPicker();
+}
+function closeNewModal(){ document.getElementById('modalScrim').classList.remove('show'); }
+async function createOpp(){
+  if(isManager()) return;
+  const sourceType = canSeeWhitelist() ? document.getElementById('nSourceType').value : 'self';
+  const customer = document.getElementById('nCustomer').value.trim();
+  const city = document.getElementById('nCity').value;
+  const district = document.getElementById('nDistrict').value;
+  const date = document.getElementById('nDate').value;
+  const note = document.getElementById('nNote').value.trim();
+  // 新增拜訪 5 欄全部必填：客戶名稱、縣市、行政區、初訪日期、初訪紀錄
+  if(sourceType==='whitelist' && !newOppWl){ alert('請先選擇白名單公司'); return; }
+  if(!customer){ alert('請輸入客戶名稱'); return; }
+  if(!city){ alert('請選擇縣市'); return; }
+  if(!district){ alert('請選擇行政區'); return; }
+  if(!date){ alert('請選擇初訪日期'); return; }
+  if(!note){ alert('請填寫初訪紀錄'); return; }
+
+  let newOppId = null;
+  if(sourceType==='whitelist'){
+    // 一次交易：白名單需為 pending → 建立商機 → 建立第一筆初訪 → 白名單狀態改 converted
+    const { data, error } = await sb.rpc('rpc_convert_whitelist_to_opportunity', {
+      p_whitelist_company_id: newOppWl.id, p_district: district, p_visit_date: date, p_visit_note: note
+    });
+    if(error){ alert('建立商機失敗：' + error.message); return; }
+    newOppId = data;
+    await refreshOneWhitelist(newOppWl.id);
+    renderWhitelistPage();
+  } else {
+    const { data, error } = await sb.rpc('rpc_create_self_opportunity', {
+      p_customer_name: customer, p_city: city, p_district: district, p_visit_date: date, p_visit_note: note
+    });
+    if(error){ alert('建立商機失敗：' + error.message); return; }
+    newOppId = data;
+  }
+
+  await loadOpportunities();
+  closeNewModal();
+  render();
+  openPanel(newOppId);
+  if(state.page==='recognition') renderRecognitionPage();
+  newOppWl = null;
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closePanel(); closeNewModal(); closeWlPanel(); closeExcludeModal(); closeDeleteReqModal(); closeDrReviewModal(); } });
+
+/* ============================================================
+   刪除申請頁（業務：自己送出的申請；主管：全組審核）
+   ============================================================ */
+function setDrFilter(status){
+  state.drFilter = status;
+  document.querySelectorAll('#drStatusFilter button').forEach(b=>b.classList.toggle('active', b.dataset.f===status));
+  renderDeleteReviewPage();
+}
+function drStatusBadge(status){
+  const label = status==='pending' ? '待審核' : status==='approved' ? '已核准' : '已拒絕';
+  return `<span class="dr-status ${status}">${label}</span>`;
+}
+function renderDeleteReviewPage(){
+  document.getElementById('drTitle').textContent = isManager() ? '刪除申請審核' : '我的刪除申請';
+  document.getElementById('drActionHead').style.display = isManager() ? 'table-cell' : 'none';
+  const list = state.drFilter==='全部' ? state.deleteRequests : state.deleteRequests.filter(r=>r.status===state.drFilter);
+  const tbody = document.getElementById('drTableBody');
+  document.getElementById('drEmptyState').style.display = list.length ? 'none' : 'block';
+  tbody.innerHTML = list.map(r=>{
+    const s = r.snapshot || {};
+    const sourceLabel = s.source_type==='whitelist' ? '白名單' : '自行開發';
+    const reqTime = r.requestedAt ? r.requestedAt.slice(0,16).replace('T',' ') : '—';
+    const actionCell = (isManager() && r.status==='pending')
+      ? `<td><button class="btn btn-primary" style="padding:6px 12px; font-size:12px;" onclick="event.stopPropagation(); openDrReviewModal('${r.id}','approve')">核准</button>
+           <button class="btn btn-danger" style="padding:6px 12px; font-size:12px; margin-left:6px;" onclick="event.stopPropagation(); openDrReviewModal('${r.id}','reject')">拒絕</button></td>`
+      : (isManager() ? '<td></td>' : '');
+    return `<tr>
+      <td class="cust-name">${esc(s.customer_name||'—')}</td>
+      <td>${esc(r.requestedBy)}</td>
+      <td>${sourceLabel}</td>
+      <td class="dr-reason">${esc(r.reason)}</td>
+      <td style="font-size:12px; color:var(--ink-faint);">${esc(r.requestedBy)}<br>${reqTime}</td>
+      <td>${drStatusBadge(r.status)}</td>
+      ${actionCell}
+    </tr>`;
+  }).join('');
+}
+function openDrReviewModal(requestId, action){
+  const r = state.deleteRequests.find(x=>x.id===requestId); if(!r) return;
+  state.drActiveId = requestId;
+  state.drPendingAction = action;
+  const s = r.snapshot || {};
+  document.getElementById('drReviewTitle').textContent = action==='approve' ? '核准並刪除商機' : '拒絕刪除申請';
+  document.getElementById('drReviewSub').textContent = `客戶「${s.customer_name||'—'}」・負責業務 ${r.requestedBy}・原因：${r.reason}` +
+    (s.source_type==='whitelist' ? '（來自白名單，核准後白名單將恢復為待開發）' : '');
+  document.getElementById('drReviewNote').value = '';
+  document.getElementById('drReviewScrim').classList.add('show');
+}
+function closeDrReviewModal(){ document.getElementById('drReviewScrim').classList.remove('show'); state.drActiveId=null; state.drPendingAction=null; }
+async function confirmDrApprove(){
+  if(!state.drActiveId) return;
+  const note = document.getElementById('drReviewNote').value.trim();
+  const { error } = await sb.rpc('rpc_approve_delete_request', { p_request_id: state.drActiveId, p_review_note: note || null });
+  if(error){ alert('核准失敗：' + error.message); return; }
+  await Promise.all([ loadDeleteRequests(), loadOpportunities(), loadWhitelist() ]);
+  closeDrReviewModal();
+  render();
+  renderDeleteReviewPage();
+  if(state.page==='whitelist') renderWhitelistPage();
+}
+async function confirmDrReject(){
+  if(!state.drActiveId) return;
+  const note = document.getElementById('drReviewNote').value.trim();
+  const { error } = await sb.rpc('rpc_reject_delete_request', { p_request_id: state.drActiveId, p_review_note: note || null });
+  if(error){ alert('拒絕失敗：' + error.message); return; }
+  await loadDeleteRequests();
+  closeDrReviewModal();
+  renderDeleteReviewPage();
+}
+
+/* ---------- Init ---------- */
+sb.auth.onAuthStateChange((_event, _session) => { initAuth(); });
+initAuth();
+
+</script>
+</body>
+</html>
